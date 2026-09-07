@@ -1,0 +1,139 @@
+services:
+  ollama:
+    image: ollama/ollama:0.33.3
+    gpus: all
+    environment:
+      OLLAMA_NO_CLOUD: "1"
+      OLLAMA_CONTEXT_LENGTH: "4096"
+    ports:
+      - "127.0.0.1:11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  ollama-models:
+    image: ollama/ollama:0.33.3
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >-
+        ollama pull qwen3.5:4b &&
+        ollama pull nomic-embed-text:v1.5
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: "no"
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: techpulse
+      POSTGRES_USER: techpulse
+      POSTGRES_PASSWORD: techpulse
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./agent_layer/db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U techpulse -d techpulse"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    healthcheck:
+      test: ["CMD-SHELL", "grep -q ':18BD ' /proc/net/tcp /proc/net/tcp6"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  faq-mcp:
+    build:
+      context: .
+      dockerfile: mcp_layer/Dockerfile
+    env_file:
+      - ${SECRETS_DIR:?Set SECRETS_DIR to your external secrets folder}/mcp_layer.env
+    environment:
+      QDRANT_URL: http://qdrant:6333
+      OLLAMA_BASE_URL: http://ollama:11434
+      MCP_PORT: 8001
+    command: >
+      sh -c "python -m mcp_layer.services.index_documents &&
+             uvicorn mcp_layer.server:app --host 0.0.0.0 --port 8001"
+    ports:
+      - "8001:8001"
+    depends_on:
+      ollama-models:
+        condition: service_completed_successfully
+      qdrant:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/ready', timeout=2).read()"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: agent_layer/Dockerfile
+    env_file:
+      - ${SECRETS_DIR:?Set SECRETS_DIR to your external secrets folder}/agent_layer.env
+      - ${SECRETS_DIR:?Set SECRETS_DIR to your external secrets folder}/mcp_layer.env
+    environment:
+      POSTGRES_URL: postgresql://techpulse:techpulse@postgres:5432/techpulse
+      QDRANT_URL: http://qdrant:6333
+      FAQ_MCP_URL: http://faq-mcp:8001/mcp
+      OLLAMA_BASE_URL: http://ollama:11434
+    command: uvicorn agent_layer.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      ollama-models:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+      faq-mcp:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/ready', timeout=2).read()"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  frontend:
+    profiles:
+      - frontend
+    build:
+      context: .
+      dockerfile: frontend_layer/Dockerfile
+    env_file:
+      - ${SECRETS_DIR:?Set SECRETS_DIR to your external secrets folder}/frontend_layer.env
+    environment:
+      PYTHONPATH: /app
+      FASTAPI_CHAT_URL: http://app:8000/chat
+      FASTAPI_SECURITY_SUITE_URL: http://app:8000/security/attack-suite
+    command: chainlit run frontend_layer/app/chainlit_app.py --host 0.0.0.0 --port 8002
+    ports:
+      - "8002:8002"
+    depends_on:
+      app:
+        condition: service_healthy
+
+volumes:
+  ollama_data:
+  postgres_data:
+  qdrant_data:
