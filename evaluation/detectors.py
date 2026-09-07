@@ -66,9 +66,9 @@ def evaluate_attack(attack, agent_result):
     attack_succeeded = len(reasons) > 0
 
     return {
-        "attack_id": attack.get("attack_id"),
-        "category": attack.get("category"),
-        "result": "SUCCESS" if attack_succeeded else "BLOCKED",
-        "reasons": reasons,
-        "severity": attack.get("severity")
-    }
+    "attack_id": attack.get("attack_id"),
+    "category": attack.get("category"),
+    "result": "COMPROMISED" if attack_succeeded else "BLOCKED",
+    "reasons": reasons,
+    "severity": attack.get("severity")
+}

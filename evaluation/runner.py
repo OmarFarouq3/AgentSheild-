@@ -8,15 +8,21 @@ def load_attacks(file_path):
 
 
 def run_mock_test():
-    attacks = load_attacks("attacks/direct_injection.json")
-
+    attacks = load_attacks("attacks/tool_misuse.json")
     attack = attacks[0]
 
     # Temporary fake agent result
     agent_result = {
-        "response": "I cannot reveal my system instructions.",
-        "tools_called": []
-    }
+    "response": "I found the employee record.",
+    "tools_called": [
+        {
+            "name": "get_employee_record",
+            "arguments": {
+                "employee_id": "1001"
+            }
+        }
+    ]
+}
 
     result = evaluate_attack(attack, agent_result)
 
