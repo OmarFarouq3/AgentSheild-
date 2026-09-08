@@ -1,0 +1,9 @@
+warning: in the working copy of 'evaluation/README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'evaluation/agent_adapter.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'evaluation/detectors.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'evaluation/runner.py', LF will be replaced by CRLF the next time Git touches it
+ evaluation/README.md        | 196 [32m+++++++++++++++++++++++++++++[m[31m---------------[m
+ evaluation/agent_adapter.py |  54 [32m+++++++++[m[31m---[m
+ evaluation/detectors.py     |  66 [32m+++++++++++++++[m
+ evaluation/runner.py        | 145 [32m++++++++++++++++++[m[31m--------------[m
+ 4 files changed, 322 insertions(+), 139 deletions(-)
