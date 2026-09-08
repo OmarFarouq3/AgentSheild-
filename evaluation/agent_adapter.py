@@ -39,7 +39,23 @@ def normalize_result(result):
             if not isinstance(call["name"], str) or not isinstance(call["arguments"], dict):
                 raise ValueError("Invalid tool trace.")
             tools_called.append({"name": call["name"], "arguments": dict(call["arguments"])})
-    return {"response": result.answer, "tools_called": tools_called}
+    return {"response": result.answer, "tools_called": tools_called, "transcript": result.transcript}
+
+
+def get_test_context(security_mode=None):
+    """Inspect the actual posture and synthetic markers without running tools."""
+    from agent_layer.config.settings import get_settings
+    from agent_layer.services.security_controls import CONFIDENTIAL_CANARY
+    from agent_layer.utils.prompts import system_instructions_for_mode
+
+    mode = security_mode or get_settings().security_mode
+    canary = get_system_canary()
+    return {
+        "security_mode": mode,
+        "system_canary": canary,
+        "confidential_canary": CONFIDENTIAL_CANARY,
+        "system_canary_available": canary in system_instructions_for_mode(mode),
+    }
 
 
 async def _run_agent(prompt, security_mode):
