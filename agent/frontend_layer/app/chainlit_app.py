@@ -43,21 +43,24 @@ async def _run_security_suite() -> str:
     baseline = report["baseline"]
     defended = report["defended"]
     rows = [
-        "| Posture | Blocked | Partial | Succeeded | Success rate |",
-        "| --- | ---: | ---: | ---: | ---: |",
+        "| Posture | Blocked | Partial | Succeeded | Success rate | Residual risk |",
+        "| --- | ---: | ---: | ---: | ---: | ---: |",
         (
             f"| Baseline | {baseline['blocked']} | {baseline['partial']} | "
-            f"{baseline['succeeded']} | {baseline['attack_success_rate_percent']}% |"
+            f"{baseline['succeeded']} | {baseline['attack_success_rate_percent']}% | "
+            f"{baseline['residual_risk_score_percent']}% |"
         ),
         (
             f"| Defended | {defended['blocked']} | {defended['partial']} | "
-            f"{defended['succeeded']} | {defended['attack_success_rate_percent']}% |"
+            f"{defended['succeeded']} | {defended['attack_success_rate_percent']}% | "
+            f"{defended['residual_risk_score_percent']}% |"
         ),
     ]
     return (
         "## Security-harness result\n\n"
         + "\n".join(rows)
         + f"\n\nSuccess-rate drop: **{report['success_rate_drop_percentage_points']} percentage points**."
+        + f" Residual-risk drop: **{report['residual_risk_drop_percentage_points']} percentage points**."
         + "\n\nTranscript evidence for each attack is retained in the API response.\n\n"
         + f"Residual gap: {report['residual_gap_note']}"
     )

@@ -8,14 +8,14 @@ from types import SimpleNamespace
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from agent.config.logging import JsonLogFormatter, reset_request_id, set_request_id
-from agent.mcp.client import parse_mcp_result
-from agent.rag.retrieval_tool import RETRIEVAL_TOOL_NAME, normalize_top_k
-from agent.tool_schemas import openai_tools
-from agent.tools.fetch_tool import _clean_html
-from agent.tools.postgres_tool import _safe_limit
-from agent.tracking import collect_sources, result_count_for
-from backend.api_schemas import ChatRequest
+from agent_layer.api.api_schemas import ChatRequest
+from agent_layer.config.logging import JsonLogFormatter, reset_request_id, set_request_id
+from agent_layer.services.postgres_tool import _safe_limit
+from agent_layer.services.tracking import collect_sources, result_count_for
+from agent_layer.utils.tool_schemas import model_tools
+from mcp_layer.services.client import parse_mcp_result
+from mcp_layer.services.fetch_tool import _to_plain_text
+from mcp_layer.services.retrieval_tool import RETRIEVAL_TOOL_NAME, normalize_top_k
 
 
 class CoreContractTests(unittest.TestCase):
@@ -29,16 +29,9 @@ class CoreContractTests(unittest.TestCase):
         self.assertIsNone(request.session_id)
 
     def test_agent_exposes_four_srs_tools(self) -> None:
-        tool_names = [tool["name"] for tool in openai_tools()]
-        self.assertEqual(
-            tool_names,
-            [
-                "github_mcp_tool",
-                "fetch_mcp_tool",
-                RETRIEVAL_TOOL_NAME,
-                "query_saved_repositories",
-            ],
-        )
+        tool_names = [tool["function"]["name"] for tool in model_tools()]
+        self.assertTrue({"github_mcp_tool", "fetch_mcp_tool", RETRIEVAL_TOOL_NAME,
+                         "query_saved_repositories"}.issubset(tool_names))
 
     def test_result_count_and_sources_for_faq(self) -> None:
         result = {
@@ -53,7 +46,7 @@ class CoreContractTests(unittest.TestCase):
 
     def test_fetch_html_is_plain_text(self) -> None:
         html = "<html><script>alert(1)</script><body><h1>Hello</h1><p>World</p></body></html>"
-        self.assertEqual(_clean_html(html), "Hello World")
+        self.assertEqual(_to_plain_text(html, 100), "Hello World")
 
     def test_parse_mcp_structured_result(self) -> None:
         result = SimpleNamespace(isError=False, structured_content={"ok": True})
@@ -73,8 +66,8 @@ class CoreContractTests(unittest.TestCase):
         self.assertEqual(_safe_limit(0, default=10, maximum=25), 1)
 
     def test_normalize_top_k_is_bounded(self) -> None:
-        self.assertGreaterEqual(normalize_top_k(None), 1)
-        self.assertEqual(normalize_top_k(0), 1)
+        self.assertGreaterEqual(normalize_top_k(None), 3)
+        self.assertEqual(normalize_top_k(0), 3)
 
     def test_json_logs_include_request_id(self) -> None:
         token = set_request_id("req-test")

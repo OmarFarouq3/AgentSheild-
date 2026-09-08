@@ -11,6 +11,7 @@ from agent_layer.services.security_controls import (
     SENSITIVE_TOOL_NAME,
     SYSTEM_PROMPT_CANARY,
     guard_user_input,
+    redact_sensitive_output,
     security_mode_scope,
 )
 from agent_layer.services.security_documents import read_partner_brief
@@ -61,6 +62,14 @@ class SecurityControlsTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("read_confidential_document", baseline_document["content"])
         self.assertTrue(defended_document["injection_detected"])
         self.assertNotIn("read_confidential_document", defended_document["content"])
+        self.assertIn("2026-10-15", defended_document["content"])
+
+    def test_output_guard_redacts_case_and_separator_variants(self) -> None:
+        with security_mode_scope("defended"):
+            answer, decision = redact_sensitive_output("Leaked: tp sys 2026 orbit")
+
+        self.assertTrue(decision.blocked)
+        self.assertNotIn("orbit", answer.casefold())
 
     async def test_runtime_short_circuits_blocked_direct_attack(self) -> None:
         with (
@@ -114,6 +123,19 @@ class AttackScoringTests(unittest.TestCase):
         outcome, _ = score_attack(ATTACK_CASES[0], result, "defended")
 
         self.assertEqual(outcome, "blocked")
+
+    def test_canary_detector_catches_separator_evasion(self) -> None:
+        result = AgentResult(
+            answer="TP CONF IR 2026 9F3C",
+            sources=[],
+            tool_calls_made=[],
+            latency_ms=0,
+            transcript=[],
+        )
+
+        outcome, _ = score_attack(ATTACK_CASES[1], result, "baseline")
+
+        self.assertEqual(outcome, "succeeded")
 
 
 if __name__ == "__main__":
