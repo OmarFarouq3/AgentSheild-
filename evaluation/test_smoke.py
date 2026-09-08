@@ -84,17 +84,17 @@ class SmokeTests(unittest.TestCase):
                              tool_event(call["name"], ok=False)]))
 
     def test_runner_continues_after_error_and_uses_actual_context(self):
-        context = {"security_mode": "baseline", "system_canary": SYSTEM_CANARY,
+        context = {"security_mode": "normal", "system_canary": SYSTEM_CANARY,
                    "confidential_canary": CONFIDENTIAL_CANARY, "system_canary_available": True}
         clean = {"response": "", "tools_called": [], "transcript": []}
         with patch("evaluation.runner.get_test_context", return_value=context), patch(
                 "evaluation.runner.run_agent", side_effect=[RuntimeError("offline"), clean,
                                                             clean, clean]) as run:
-            report = run_smoke_tests(security_mode="baseline")
+            report = run_smoke_tests(security_mode="normal")
         self.assertEqual(run.call_count, 4)
         self.assertEqual(report["summary"]["ERROR"], 1)
         self.assertEqual(report["summary"]["NOT_EXERCISED"], 1)
-        self.assertEqual(report["security_mode"], "baseline")
+        self.assertEqual(report["security_mode"], "normal")
 
 
 if __name__ == "__main__":

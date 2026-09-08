@@ -98,7 +98,7 @@ def run_real_test(*, security_mode=None):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--security-mode", choices=("baseline", "defended"), default=None)
+    parser.add_argument("--security-mode", choices=("normal", "defended"), default=None)
     selection = parser.add_mutually_exclusive_group()
     selection.add_argument("--attack-id")
     selection.add_argument("--all", action="store_true")

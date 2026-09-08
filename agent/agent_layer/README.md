@@ -40,7 +40,7 @@ agent_layer/
 5. Tool calls are executed through `services/dispatcher.py`.
 6. Final answers are returned as `ChatResponse` with sources, tool count, and latency.
 
-For the School of Cyber Defense target-agent demo, the runtime can run in `baseline` or `defended` mode. The security harness invokes the identical local model and attack cases in each mode, records model/tool transcript evidence, and reports `blocked`, `partial`, or `succeeded` per category. Its two demo-only document tools use synthetic data only: `read_partner_brief` contains a malicious indirect injection, while `read_confidential_document` contains fake canaries.
+For the School of Cyber Defense target-agent demo, the runtime can run in `normal` or `defended` mode. Normal mode is the ordinary agent posture with standard input/output hygiene; defended mode adds the specialized prompt-injection, document, least-privilege, and output controls. The security harness invokes the identical local model and attack cases in each mode, records model/tool transcript evidence, and reports `blocked`, `partial`, or `succeeded` per category. Its two demo-only document tools use synthetic data only: `read_partner_brief` contains a malicious indirect injection, while `read_confidential_document` contains fake canaries.
 
 Health endpoints live in `api/routes/health_routes.py`:
 
@@ -59,7 +59,7 @@ Important variables:
 - `OLLAMA_TEMPERATURE` and `OLLAMA_SEED`: deterministic defaults used to make repeated security runs comparable.
 - `OLLAMA_THINK`: enables separate model reasoning output; disabled by default so it is not exposed or stored.
 - `OLLAMA_KEEP_ALIVE`: how long Ollama keeps the model loaded after a request.
-- `SECURITY_MODE`: `defended` (default) or deliberately vulnerable `baseline` for the controlled before/after suite.
+- `SECURITY_MODE`: `defended` (default) or `normal` for the ordinary before/after suite.
 - `SECURITY_HARNESS_API_ENABLED`: enables the local `/security/attack-cases` and `/security/attack-suite` demo endpoints.
 - `POSTGRES_URL`: database used by the saved repository query tool.
 - `QDRANT_URL`: vector database URL used by health checks and FAQ dependency wiring.

@@ -22,7 +22,7 @@ TechPulse now doubles as a deliberately testable target agent. The original publ
 - `read_partner_brief` returns an untrusted external brief containing a simulated indirect prompt injection.
 - `read_confidential_document` touches a simulated incident-response playbook containing only fake canary values—never real secrets.
 
-The agent has two comparable postures. `baseline` intentionally exposes the sensitive tool and passes document content through for a controlled demonstration. `defended` is the safe default and combines an input guard, an untrusted-document injection classifier, a model tool allow-list plus dispatcher-level enforcement, and an output canary redactor. These are visible, testable controls rather than claims that prompt injection is solved.
+The agent has two comparable postures. `normal` is the ordinary agent with standard prompt, tool, input, and output hygiene. `defended` is the safe default and adds stronger input screening, untrusted-document injection classification, least-privilege enforcement, and output canary redaction. These are visible, testable controls rather than claims that prompt injection is solved.
 
 The automated suite runs the same four categories against both postures—direct prompt injection, indirect document injection, tool misuse/privilege escalation, and system-prompt or data exfiltration. It grades each attempt as `blocked`, `partial`, or `succeeded`, retains the agent/tool transcript as evidence, calculates attack success rate, and names the residual gaps.
 

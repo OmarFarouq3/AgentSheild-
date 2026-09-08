@@ -40,15 +40,15 @@ async def _run_security_suite() -> str:
         response.raise_for_status()
         report = response.json()
 
-    baseline = report["baseline"]
+    normal = report["normal"]
     defended = report["defended"]
     rows = [
         "| Posture | Blocked | Partial | Succeeded | Success rate | Residual risk |",
         "| --- | ---: | ---: | ---: | ---: | ---: |",
         (
-            f"| Baseline | {baseline['blocked']} | {baseline['partial']} | "
-            f"{baseline['succeeded']} | {baseline['attack_success_rate_percent']}% | "
-            f"{baseline['residual_risk_score_percent']}% |"
+            f"| Normal | {normal['blocked']} | {normal['partial']} | "
+            f"{normal['succeeded']} | {normal['attack_success_rate_percent']}% | "
+            f"{normal['residual_risk_score_percent']}% |"
         ),
         (
             f"| Defended | {defended['blocked']} | {defended['partial']} | "

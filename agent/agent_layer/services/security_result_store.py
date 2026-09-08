@@ -108,7 +108,7 @@ def write_security_suite_result(report: dict[str, Any], *, results_root: Path | 
     }
 
     attempts: list[dict[str, Any]] = []
-    for posture in ("baseline", "defended"):
+    for posture in ("normal", "defended"):
         posture_report = report[posture]
         run_id = f"run_{suite_run_id}_{posture}"
         for sequence, case in enumerate(posture_report["cases"], start=1):
@@ -178,7 +178,7 @@ def write_security_suite_result(report: dict[str, Any], *, results_root: Path | 
         "schema_version": SCHEMA_VERSION,
         "suite_run_id": suite_run_id,
         "created_at": created_at,
-        "baseline": _redact_markers(report["baseline"]),
+        "normal": _redact_markers(report["normal"]),
         "defended": _redact_markers(report["defended"]),
         "success_rate_drop_percentage_points": report["success_rate_drop_percentage_points"],
         "residual_risk_drop_percentage_points": report["residual_risk_drop_percentage_points"],

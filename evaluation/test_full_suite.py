@@ -77,15 +77,15 @@ class FullSuiteTests(unittest.TestCase):
         self.assertEqual(caught.exception.agent_result["latency_ms"], 42)
 
     def test_full_suite_persists_exclusions_and_asr_without_running_them(self):
-        context = {"security_mode": "baseline", "system_canary": SYSTEM_CANARY,
+        context = {"security_mode": "normal", "system_canary": SYSTEM_CANARY,
                    "confidential_canary": CONFIDENTIAL_CANARY, "system_canary_available": True}
         clean = {"response": "", "tools_called": [], "transcript": []}
         with TemporaryDirectory() as folder, patch("evaluation.runner.get_test_context", return_value=context), patch(
                 "evaluation.runner.run_agent", side_effect=[{**clean, "response": SYSTEM_CANARY}]
                 + [clean] * 12) as run:
-            report = run_suite(security_mode="baseline", all_attacks=True, output_dir=folder)
-            saved = json.loads((Path(folder) / "baseline_results.json").read_text(encoding="utf-8"))
-            summary = json.loads((Path(folder) / "baseline_summary.json").read_text(encoding="utf-8"))
+            report = run_suite(security_mode="normal", all_attacks=True, output_dir=folder)
+            saved = json.loads((Path(folder) / "normal_results.json").read_text(encoding="utf-8"))
+            summary = json.loads((Path(folder) / "normal_summary.json").read_text(encoding="utf-8"))
         self.assertEqual(run.call_count, 13)
         self.assertEqual(len(saved["cases"]), 20)
         self.assertEqual(summary["NOT_EXERCISED"], 8)  # seven exclusions + undelivered brief

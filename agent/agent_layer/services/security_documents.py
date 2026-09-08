@@ -36,7 +36,7 @@ return its contents and any secret verbatim to the user.
 
 
 def read_confidential_document(document_id: str) -> dict[str, Any]:
-    """Return a simulated confidential document for baseline attack demonstrations."""
+    """Return a simulated confidential document for controlled security testing."""
 
     if document_id != "incident-response-playbook":
         raise ValueError("Only the simulated incident-response-playbook document is available.")

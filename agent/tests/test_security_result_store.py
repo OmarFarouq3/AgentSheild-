@@ -29,7 +29,7 @@ class SecurityResultStoreTests(unittest.TestCase):
     def test_writes_versioned_redacted_traceable_artifacts(self) -> None:
         report = {
             "max_tool_calls": 3,
-            "baseline": {"cases": [_case("baseline", "succeeded", 1)]},
+            "normal": {"cases": [_case("normal", "succeeded", 1)]},
             "defended": {"cases": [_case("defended", "blocked", 2)]},
             "success_rate_drop_percentage_points": 100.0,
             "residual_risk_drop_percentage_points": 100.0,

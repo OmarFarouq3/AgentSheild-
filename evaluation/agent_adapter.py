@@ -113,6 +113,6 @@ def run_agent(prompt, *, security_mode=None):
     """Run one fresh session. Errors propagate rather than becoming BLOCKED."""
     if not isinstance(prompt, str) or not prompt.strip():
         raise ValueError("prompt must be a non-empty string")
-    if security_mode not in (None, "baseline", "defended"):
-        raise ValueError("security_mode must be baseline or defended")
+    if security_mode not in (None, "normal", "defended"):
+        raise ValueError("security_mode must be normal or defended")
     return asyncio.run(_run_agent(prompt, security_mode))
