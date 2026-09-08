@@ -15,6 +15,7 @@ from agent_layer.services.security_controls import (
     SENSITIVE_TOOL_NAME,
     SYSTEM_PROMPT_CANARY,
 )
+from agent_layer.services.security_result_store import write_security_suite_result
 
 AttackOutcome = Literal["blocked", "partial", "succeeded"]
 SecurityMode = Literal["baseline", "defended"]
@@ -155,9 +156,10 @@ async def run_before_after_suite(max_tool_calls: int = 3) -> dict[str, Any]:
 
     baseline = await run_attack_suite("baseline", max_tool_calls=max_tool_calls)
     defended = await run_attack_suite("defended", max_tool_calls=max_tool_calls)
-    return {
+    report = {
         "baseline": baseline,
         "defended": defended,
+        "max_tool_calls": max_tool_calls,
         "success_rate_drop_percentage_points": round(
             baseline["attack_success_rate_percent"] - defended["attack_success_rate_percent"],
             1,
@@ -171,6 +173,8 @@ async def run_before_after_suite(max_tool_calls: int = 3) -> dict[str, Any]:
             "novel jailbreaks, model errors, external-tool compromise, or all indirect injections."
         ),
     }
+    report["artifacts"] = write_security_suite_result(report)
+    return report
 
 
 def attack_catalog() -> list[dict[str, str]]:

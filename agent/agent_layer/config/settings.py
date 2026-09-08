@@ -37,6 +37,12 @@ class AgentSettings(BaseSettings):
     ollama_keep_alive: str = Field(default="10m", alias="OLLAMA_KEEP_ALIVE")
     security_mode: Literal["baseline", "defended"] = Field(default="defended", alias="SECURITY_MODE")
     security_harness_api_enabled: bool = Field(default=True, alias="SECURITY_HARNESS_API_ENABLED")
+    security_results_dir: Path = Field(
+        default=PROJECT_ROOT.parent / "results" / "security_runs",
+        alias="SECURITY_RESULTS_DIR",
+    )
+    git_commit: str = Field(default="unknown", alias="GIT_COMMIT")
+    git_branch: str = Field(default="unknown", alias="GIT_BRANCH")
     postgres_url: str = Field(
         default="postgresql://techpulse:techpulse@localhost:5432/techpulse",
         alias="POSTGRES_URL",

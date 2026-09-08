@@ -203,6 +203,9 @@ cython_debug/
 # Temporary file for partial code execution
 tempCodeRunnerFile.py
 
+# Generated security-suite evidence; retain locally for dashboarding, never commit.
+results/security_runs/
+
 # Ruff stuff:
 .ruff_cache/
 
