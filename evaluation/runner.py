@@ -5,6 +5,7 @@ from collections import Counter
 from copy import deepcopy
 import json
 from pathlib import Path
+import re
 
 from evaluation.agent_adapter import get_test_context, run_agent
 from evaluation.detectors import evaluate_attack
