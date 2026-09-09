@@ -150,6 +150,8 @@ activemq-data/
 # Environments
 .env
 .envrc
+.secrets/
+agent/secrets/
 .venv
 env/
 venv/
@@ -219,3 +221,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# React/Vite frontend generated files
+frontend/node_modules/
+frontend/dist/
+frontend/*.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts
