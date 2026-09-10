@@ -1,5 +1,5 @@
 -- ============================================================
--- TechPulse Assistant — Seed Data
+-- AgentShield Assistant — Seed Data
 -- Tables: repos, tags, authors
 -- ============================================================
 

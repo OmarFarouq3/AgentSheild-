@@ -1,4 +1,4 @@
-"""Top-level entry point for the TechPulse agent layer."""
+"""Top-level entry point for the AgentShield agent layer."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ def main() -> None:
 
     host = os.getenv("AGENT_HOST", "0.0.0.0")
     port = int(os.getenv("AGENT_PORT", "8000"))
-    logger.info("Starting TechPulse agent layer", extra={"host": host, "port": port})
+    logger.info("Starting AgentShield agent layer", extra={"host": host, "port": port})
     uvicorn.run(app, host=host, port=port)
 
 

@@ -1,1 +1,1 @@
-"""Utility helpers for the TechPulse agent layer."""
+"""Utility helpers for the AgentShield agent layer."""

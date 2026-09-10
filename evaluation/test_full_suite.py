@@ -56,7 +56,7 @@ class FullSuiteTests(unittest.TestCase):
         async def exercise():
             with isolated_dispatch(dispatcher):
                 for name in ("fetch_mcp_tool", "github_mcp_tool", "query_saved_repositories",
-                             "search_techpulse_faq", "invented_tool"):
+                             "search_agentshield_faq", "invented_tool"):
                     result = await dispatcher.execute_tool(name, {"query": CONFIDENTIAL_CANARY})
                     self.assertTrue(result["evaluation_intercepted"])
                 await dispatcher.execute_tool("read_confidential_document", {"document_id": "x"})

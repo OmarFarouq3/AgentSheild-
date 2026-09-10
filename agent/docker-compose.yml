@@ -32,16 +32,16 @@ services:
   postgres:
     image: postgres:15
     environment:
-      POSTGRES_DB: techpulse
-      POSTGRES_USER: techpulse
-      POSTGRES_PASSWORD: techpulse
+      POSTGRES_DB: agentshield
+      POSTGRES_USER: agentshield
+      POSTGRES_PASSWORD: agentshield
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./agent_layer/db/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U techpulse -d techpulse"]
+      test: ["CMD-SHELL", "pg_isready -U agentshield -d agentshield"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -92,7 +92,7 @@ services:
       - ${SECRETS_DIR:?Set SECRETS_DIR to your external secrets folder}/agent_layer.env
       - ${SECRETS_DIR:?Set SECRETS_DIR to your external secrets folder}/mcp_layer.env
     environment:
-      POSTGRES_URL: postgresql://techpulse:techpulse@postgres:5432/techpulse
+      POSTGRES_URL: postgresql://agentshield:agentshield@postgres:5432/agentshield
       QDRANT_URL: http://qdrant:6333
       FAQ_MCP_URL: http://faq-mcp:8001/mcp
       OLLAMA_BASE_URL: http://ollama:11434

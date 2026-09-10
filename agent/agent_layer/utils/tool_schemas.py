@@ -102,7 +102,7 @@ def model_tools() -> list[dict[str, Any]]:
         },
         {
             "name": RETRIEVAL_TOOL_NAME,
-            "description": "Search the curated TechPulse FAQ knowledge base through the MCP server backed by Qdrant.",
+            "description": "Search the curated AgentShield FAQ knowledge base through the MCP server backed by Qdrant.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -121,7 +121,7 @@ def model_tools() -> list[dict[str, Any]]:
         {
             "name": "query_saved_repositories",
             "description": (
-                "Internal Postgres tool for saved TechPulse repository records only. "
+                "Internal Postgres tool for saved AgentShield repository records only. "
                 "Use only when the user asks about saved, stored, internal, or database "
                 "records. Do not use for live/public GitHub metadata."
             ),

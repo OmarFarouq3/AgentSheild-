@@ -1,52 +1,52 @@
 [
   {
-    "question": "What is TechPulse?",
-    "answer": "TechPulse is a single-agent AI system that answers questions about the tech industry by combining live web data, a curated FAQ knowledge base, and structured repository records.",
-    "source": "techpulse_srs_faq"
+    "question": "What is AgentShield?",
+    "answer": "AgentShield is a single-agent AI system that answers questions about the tech industry by combining live web data, a curated FAQ knowledge base, and structured repository records.",
+    "source": "agentshield_srs_faq"
   },
   {
-    "question": "Which tools should the TechPulse agent use?",
+    "question": "Which tools should the AgentShield agent use?",
     "answer": "The agent uses an external GitHub MCP integration, an external Fetch MCP integration, an intern-built FAQ MCP server backed by Qdrant, and safe internal Postgres query tools for saved repository records.",
-    "source": "techpulse_srs_faq"
+    "source": "agentshield_srs_faq"
   },
   {
     "question": "What does the FAQ MCP server do?",
     "answer": "The FAQ MCP server accepts a natural-language query, creates an embedding, searches Qdrant for the top matching FAQ chunks, and returns structured results to the agent.",
-    "source": "techpulse_srs_faq"
+    "source": "agentshield_srs_faq"
   },
   {
     "question": "Which Qdrant collection stores FAQ chunks?",
     "answer": "FAQ chunks are stored in the Qdrant collection named faq_chunks by default. The collection name is configurable with QDRANT_COLLECTION.",
-    "source": "techpulse_srs_faq"
+    "source": "agentshield_srs_faq"
   },
   {
     "question": "Which FastAPI endpoints are required?",
     "answer": "The application exposes POST /chat for user questions and GET /health for active health checks of Qdrant, PostgreSQL, and agent readiness.",
-    "source": "techpulse_srs_faq"
+    "source": "agentshield_srs_faq"
   },
   {
     "question": "How does the Postgres query tool stay safe?",
     "answer": "The Postgres tool never accepts raw SQL from the agent. It only accepts named query intents that map to predefined read-only parameterized SELECT queries.",
-    "source": "techpulse_srs_faq"
+    "source": "agentshield_srs_faq"
   },
   {
     "question": "What structured repository tables exist in PostgreSQL?",
     "answer": "The database contains repos, tags, and authors tables. Repos store name, language, stars, description, and saved_at. Tags and authors reference repos by repo_id.",
-    "source": "techpulse_srs_faq"
+    "source": "agentshield_srs_faq"
   },
   {
     "question": "What should the health endpoint return?",
     "answer": "GET /health returns a typed response with status, qdrant, postgres, agent, and version. It returns HTTP 200 even if degraded, using the status field to indicate problems.",
-    "source": "techpulse_srs_faq"
+    "source": "agentshield_srs_faq"
   },
   {
     "question": "What are the logging requirements?",
     "answer": "Logs must be structured JSON, have configurable LOG_LEVEL, include request_id for request-scoped logs, and avoid sensitive DB values in DEBUG logs in production.",
-    "source": "techpulse_srs_faq"
+    "source": "agentshield_srs_faq"
   },
   {
     "question": "How is the system containerized?",
     "answer": "Docker Compose starts the app, faq-mcp, qdrant, and postgres services. Qdrant and Postgres have health checks, volumes persist data, and seed scripts run on first boot.",
-    "source": "techpulse_srs_faq"
+    "source": "agentshield_srs_faq"
   }
 ]

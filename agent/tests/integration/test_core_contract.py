@@ -36,12 +36,12 @@ class CoreContractTests(unittest.TestCase):
     def test_result_count_and_sources_for_faq(self) -> None:
         result = {
             "chunks_found": 2,
-            "sources": ["faq:techpulse#chunk-1", "faq:techpulse#chunk-2"],
+            "sources": ["faq:agentshield#chunk-1", "faq:agentshield#chunk-2"],
         }
         self.assertEqual(result_count_for(RETRIEVAL_TOOL_NAME, result), 2)
         self.assertEqual(
             collect_sources(RETRIEVAL_TOOL_NAME, result),
-            ["faq:techpulse#chunk-1", "faq:techpulse#chunk-2"],
+            ["faq:agentshield#chunk-1", "faq:agentshield#chunk-2"],
         )
 
     def test_fetch_html_is_plain_text(self) -> None:

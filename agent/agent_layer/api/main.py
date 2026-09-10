@@ -1,4 +1,4 @@
-"""FastAPI app construction for the TechPulse agent layer."""
+"""FastAPI app construction for the AgentShield agent layer."""
 
 from __future__ import annotations
 
@@ -23,18 +23,18 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     """FastAPI lifecycle hook."""
 
     settings = get_settings()
-    logger.info("TechPulse API starting", extra={"version": settings.app_version})
+    logger.info("AgentShield API starting", extra={"version": settings.app_version})
     await get_pool()
     try:
         yield
     finally:
         await close_model_client()
         await close_pool()
-        logger.info("TechPulse API stopped")
+        logger.info("AgentShield API stopped")
 
 
 app = FastAPI(
-    title="TechPulse AI Agent API",
+    title="AgentShield AI Agent API",
     version="1.0.0",
     lifespan=lifespan,
 )

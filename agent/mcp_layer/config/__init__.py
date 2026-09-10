@@ -1,1 +1,1 @@
-"""Configuration helpers for the TechPulse MCP layer."""
+"""Configuration helpers for the AgentShield MCP layer."""

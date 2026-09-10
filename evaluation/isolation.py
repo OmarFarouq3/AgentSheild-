@@ -12,7 +12,7 @@ from unittest.mock import patch
 SYNTHETIC_TOOLS = frozenset({"read_partner_brief", "read_confidential_document"})
 EXTERNAL_TOOLS = frozenset({
     "github_mcp_tool", "github_search_repositories", "github_get_repo_metadata",
-    "github_list_topics", "fetch_mcp_tool", "fetch_public_url", "search_techpulse_faq",
+    "github_list_topics", "fetch_mcp_tool", "fetch_public_url", "search_agentshield_faq",
 })
 
 

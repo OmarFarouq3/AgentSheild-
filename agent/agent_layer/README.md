@@ -1,6 +1,6 @@
 # Agent Layer
 
-The agent layer is the FastAPI backend and model runtime for TechPulse. It receives chat requests, runs a guarded tool loop against a local Ollama model, dispatches model-selected tools, and returns grounded answers with source and latency metadata.
+The agent layer is the FastAPI backend and model runtime for AgentShield. It receives chat requests, runs a guarded tool loop against a local Ollama model, dispatches model-selected tools, and returns grounded answers with source and latency metadata.
 
 ## Entry Point
 

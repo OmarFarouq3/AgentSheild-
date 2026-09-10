@@ -1,2 +1,2 @@
-"""Runtime tools available to the TechPulse agent."""
+"""Runtime tools available to the AgentShield agent."""
 

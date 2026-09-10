@@ -17,7 +17,7 @@ logger = get_logger(__name__)
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest) -> ChatResponse:
-    """Run the TechPulse agent and return the final answer."""
+    """Run the AgentShield agent and return the final answer."""
 
     logger.info(
         "Incoming request",
@@ -51,4 +51,4 @@ async def chat(request: ChatRequest) -> ChatResponse:
         raise
     except Exception as exc:
         logger.exception("Agent request failed")
-        raise HTTPException(status_code=503, detail="The TechPulse agent is temporarily unavailable.") from exc
+        raise HTTPException(status_code=503, detail="The AgentShield agent is temporarily unavailable.") from exc

@@ -1,6 +1,6 @@
 # MCP Layer
 
-The MCP layer owns TechPulse's tool-facing integrations. It hosts the custom FAQ MCP server, indexes FAQ content into Qdrant, and wraps external GitHub and fetch MCP capabilities for the agent layer.
+The MCP layer owns AgentShield's tool-facing integrations. It hosts the custom FAQ MCP server, indexes FAQ content into Qdrant, and wraps external GitHub and fetch MCP capabilities for the agent layer.
 
 ## Entry Points
 
@@ -42,7 +42,7 @@ mcp_layer/
 1. FAQ records are loaded from `data/faq/*.json`.
 2. `services/index_documents.py` embeds each FAQ record through Ollama with the configured local embedding model.
 3. Embedded records are upserted into the configured Qdrant collection.
-4. `server.py` exposes the `search_techpulse_faq` MCP tool over Streamable HTTP.
+4. `server.py` exposes the `search_agentshield_faq` MCP tool over Streamable HTTP.
 5. The agent layer calls the FAQ MCP endpoint through its dispatcher when the model selects that tool.
 
 The server also mounts:

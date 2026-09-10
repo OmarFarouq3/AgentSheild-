@@ -1,4 +1,4 @@
-"""Optional Chainlit frontend for the TechPulse FastAPI agent.
+"""Optional Chainlit frontend for the AgentShield FastAPI agent.
 
 Run after FastAPI is up:
     chainlit run frontend_layer/app/chainlit_app.py -w --host 0.0.0.0 --port 8002
@@ -22,7 +22,7 @@ async def on_chat_start() -> None:
     cl.user_session.set("session_id", str(uuid.uuid4()))
     await cl.Message(
         content=(
-            "Hello! Ask me about tech repositories, URLs, or the TechPulse FAQ. "
+            "Hello! Ask me about tech repositories, URLs, or the AgentShield FAQ. "
             "For the School of Cyber Defense demo, send `/run-security-suite`."
         )
     ).send()
@@ -110,7 +110,7 @@ async def on_message(message: cl.Message) -> None:
         elif status_code == 504:
             thinking.content = "The agent took too long to answer. Please try a narrower question."
         else:
-            thinking.content = "The TechPulse agent is temporarily unavailable."
+            thinking.content = "The AgentShield agent is temporarily unavailable."
         await thinking.update()
 
     except httpx.RequestError as exc:
@@ -118,7 +118,7 @@ async def on_message(message: cl.Message) -> None:
             "Could not connect to FastAPI",
             extra={"error_type": type(exc).__name__, "error_message": str(exc)},
         )
-        thinking.content = "Could not connect to the TechPulse API."
+        thinking.content = "Could not connect to the AgentShield API."
         await thinking.update()
 
     except Exception:

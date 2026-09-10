@@ -1,6 +1,6 @@
 # Frontend Layer
 
-The frontend layer is the optional Chainlit chat UI for TechPulse. It does not run the agent directly; it sends user messages to the FastAPI backend and renders the answer plus any returned sources.
+The frontend layer is the optional Chainlit chat UI for AgentShield. It does not run the agent directly; it sends user messages to the FastAPI backend and renders the answer plus any returned sources.
 
 For the School of Cyber Defense presentation, enter `/run-security-suite` in the chat. The UI calls the controlled API suite and shows the normal-versus-defended attack totals, success-rate drop, and residual-gap note. The detailed evidence stays in the API response at `/security/attack-suite`.
 

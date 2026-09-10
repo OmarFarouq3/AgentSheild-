@@ -1,4 +1,4 @@
-"""FAQ MCP server for TechPulse."""
+"""FAQ MCP server for AgentShield."""
 
 from __future__ import annotations
 
@@ -19,10 +19,10 @@ from mcp_layer.services.retrieval_tool import (
 logger = get_logger(__name__)
 
 mcp = FastMCP(
-    name="TechPulse FAQ MCP Server",
+    name="AgentShield FAQ MCP Server",
     instructions=(
-        "Searches the curated TechPulse FAQ knowledge base stored in Qdrant. "
-        "Use this tool for questions about the TechPulse project, MCP, agents, "
+        "Searches the curated AgentShield FAQ knowledge base stored in Qdrant. "
+        "Use this tool for questions about the AgentShield project, MCP, agents, "
         "Qdrant FAQ retrieval, Postgres repository records, Docker Compose, and API behavior."
     ),
     stateless_http=True,
@@ -33,18 +33,18 @@ mcp = FastMCP(
 @mcp.tool(
     name=RETRIEVAL_TOOL_NAME,
     description=(
-        "Search the curated TechPulse FAQ knowledge base and return ranked FAQ chunks "
+        "Search the curated AgentShield FAQ knowledge base and return ranked FAQ chunks "
         "with source labels and model-ready context."
     ),
     structured_output=True,
 )
-def search_techpulse_faq(
+def search_agentshield_faq(
     query: Annotated[
         str,
         Field(
             description=(
-                "Natural-language question to search for in the TechPulse FAQ. "
-                "Use this for questions about TechPulse behavior, architecture, MCP, "
+                "Natural-language question to search for in the AgentShield FAQ. "
+                "Use this for questions about AgentShield behavior, architecture, MCP, "
                 "Qdrant retrieval, Docker Compose, API routes, or saved repository records."
             ),
         ),
@@ -68,7 +68,7 @@ def search_techpulse_faq(
         ),
     ] = None,
 ) -> FAQRetrievalResult:
-    """Retrieve the most relevant TechPulse FAQ chunks from Qdrant."""
+    """Retrieve the most relevant AgentShield FAQ chunks from Qdrant."""
 
     token = set_request_id(request_id or "-")
     try:

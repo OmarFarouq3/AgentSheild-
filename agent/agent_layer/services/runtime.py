@@ -322,7 +322,7 @@ async def run_agent(
     max_tool_calls: int,
     security_mode: SecurityMode | None = None,
 ) -> AgentResult:
-    """Run the TechPulse agent through the configured LangGraph workflow."""
+    """Run the AgentShield agent through the configured LangGraph workflow."""
 
     with security_mode_scope(security_mode):
         result = await run_agent_workflow(query, session_id, max_tool_calls, _run_tool_loop)

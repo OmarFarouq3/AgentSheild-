@@ -1,2 +1,2 @@
-"""FastAPI backend package for TechPulse."""
+"""FastAPI backend package for AgentShield."""
 

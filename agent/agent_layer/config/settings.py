@@ -44,7 +44,7 @@ class AgentSettings(BaseSettings):
     git_commit: str = Field(default="unknown", alias="GIT_COMMIT")
     git_branch: str = Field(default="unknown", alias="GIT_BRANCH")
     postgres_url: str = Field(
-        default="postgresql://techpulse:techpulse@localhost:5432/techpulse",
+        default="postgresql://agentshield:agentshield@localhost:5432/agentshield",
         alias="POSTGRES_URL",
     )
     qdrant_url: str = Field(default="http://localhost:6333", alias="QDRANT_URL")

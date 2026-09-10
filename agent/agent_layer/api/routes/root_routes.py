@@ -11,5 +11,5 @@ router = APIRouter(tags=["info"])
 async def root() -> dict[str, str]:
     """Return a simple API running message."""
 
-    return {"message": "TechPulse AI Agent API is running. Use POST /chat or GET /health."}
+    return {"message": "AgentShield AI Agent API is running. Use POST /chat or GET /health."}
 

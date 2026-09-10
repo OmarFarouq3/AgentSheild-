@@ -1,4 +1,4 @@
-"""Structured JSON logging and request-id context for TechPulse."""
+"""Structured JSON logging and request-id context for AgentShield."""
 
 from __future__ import annotations
 

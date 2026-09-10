@@ -1,4 +1,4 @@
-"""Synchronous bridge to the real TechPulse runtime (not the demo adapter)."""
+"""Synchronous bridge to the real AgentShield runtime (not the demo adapter)."""
 
 import asyncio
 from collections import deque

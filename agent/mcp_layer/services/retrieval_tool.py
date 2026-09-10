@@ -20,7 +20,7 @@ from mcp_layer.services.ollama_embeddings import embed_query, ensure_qdrant_dime
 
 logger = get_logger(__name__)
 
-RETRIEVAL_TOOL_NAME = "search_techpulse_faq"
+RETRIEVAL_TOOL_NAME = "search_agentshield_faq"
 FAQ_DATA_FOLDER = Path(__file__).resolve().parents[1] / "data" / "faq"
 
 _qdrant_client: QdrantClient | None = None
@@ -38,7 +38,7 @@ class FAQChunk(BaseModel):
 
 
 class FAQRetrievalResult(BaseModel):
-    """Structured result returned by the TechPulse FAQ MCP retrieval tool."""
+    """Structured result returned by the AgentShield FAQ MCP retrieval tool."""
 
     tool_name: str = Field(description="Name of the MCP tool that produced this result.")
     top_k: int = Field(description="Normalized number of FAQ chunks requested.")

@@ -1,4 +1,4 @@
-"""Seed the TechPulse FAQ knowledge base into Qdrant."""
+"""Seed the AgentShield FAQ knowledge base into Qdrant."""
 
 from __future__ import annotations
 

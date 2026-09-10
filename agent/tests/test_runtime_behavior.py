@@ -19,7 +19,7 @@ class RuntimeBehaviorTests(unittest.IsolatedAsyncioTestCase):
         runtime.session_histories.clear()
 
     async def test_greeting_response_comes_from_model(self) -> None:
-        answer = "Hey there. I can help with TechPulse repo questions."
+        answer = "Hey there. I can help with AgentShield repo questions."
         model_response = {"message": {"role": "assistant", "content": answer}}
 
         with patch.object(runtime, "call_model", new=AsyncMock(return_value=model_response)) as model_mock:
@@ -32,7 +32,7 @@ class RuntimeBehaviorTests(unittest.IsolatedAsyncioTestCase):
     async def test_out_of_scope_response_comes_from_model(self) -> None:
         answer = (
             "That is outside what I can help with here. I can help with GitHub repos, URLs, "
-            "TechPulse FAQ, or saved repository records."
+            "AgentShield FAQ, or saved repository records."
         )
         model_response = {"message": {"role": "assistant", "content": answer}}
 
@@ -49,7 +49,7 @@ class RuntimeBehaviorTests(unittest.IsolatedAsyncioTestCase):
         )
 
         self.assertEqual(messages[0]["role"], "system")
-        self.assertIn("You are TechPulse", messages[0]["content"])
+        self.assertIn("You are AgentShield", messages[0]["content"])
         self.assertEqual(messages[1], {"role": "assistant", "content": "earlier answer"})
         self.assertEqual(messages[2], {"role": "user", "content": "latest question"})
 

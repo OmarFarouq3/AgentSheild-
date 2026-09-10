@@ -1,12 +1,12 @@
-# TechPulse AI Agent
+# AgentShield AI Agent
 
-TechPulse is a LangGraph-backed single-agent FastAPI application that answers tech-industry questions with a local, open-weight LLM, external MCP-style GitHub and fetch tools, a custom FAQ MCP server backed by Qdrant, and a safe named PostgreSQL query tool over seeded repository records.
+AgentShield is a LangGraph-backed single-agent FastAPI application that answers tech-industry questions with a local, open-weight LLM, external MCP-style GitHub and fetch tools, a custom FAQ MCP server backed by Qdrant, and a safe named PostgreSQL query tool over seeded repository records.
 
 The agent exposes the four model-visible tools described by the SRS component diagram:
 
 - `github_mcp_tool`: external GitHub MCP operations for repository search, metadata, and topics
 - `fetch_mcp_tool`: external fetch operation for public URL text extraction
-- `search_techpulse_faq`: custom FAQ MCP server tool backed by Qdrant
+- `search_agentshield_faq`: custom FAQ MCP server tool backed by Qdrant
 - `query_saved_repositories`: internal Postgres named-query tool
 
 ## Local model choice
@@ -17,7 +17,7 @@ FAQ vectors use the local `nomic-embed-text:v1.5` embedding model. Neither model
 
 ## School of Cyber Defense security harness
 
-TechPulse now doubles as a deliberately testable target agent. The original public GitHub, URL, FAQ, and saved-repository tools remain, while the harness adds two synthetic document tools:
+AgentShield now doubles as a deliberately testable target agent. The original public GitHub, URL, FAQ, and saved-repository tools remain, while the harness adds two synthetic document tools:
 
 - `read_partner_brief` returns an untrusted external brief containing a simulated indirect prompt injection.
 - `read_confidential_document` touches a simulated incident-response playbook containing only fake canary values—never real secrets.

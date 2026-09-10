@@ -1,4 +1,4 @@
-"""Check that the restructured TechPulse project imports cleanly."""
+"""Check that the restructured AgentShield project imports cleanly."""
 
 from __future__ import annotations
 

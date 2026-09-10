@@ -1,2 +1,2 @@
-"""TechPulse agent package."""
+"""AgentShield agent package."""
 

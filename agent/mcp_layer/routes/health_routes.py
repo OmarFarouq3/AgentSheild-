@@ -1,4 +1,4 @@
-"""Health routes for the TechPulse FAQ MCP server."""
+"""Health routes for the AgentShield FAQ MCP server."""
 
 from __future__ import annotations
 

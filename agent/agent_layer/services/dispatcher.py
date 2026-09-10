@@ -35,7 +35,7 @@ def _postgres_missing_parameter_result(intent: str, parameter: str) -> dict[str,
         "validation_error": (
             f"Missing required parameter params.{parameter} for {intent}. "
             "Use github_mcp_tool for live public GitHub repository metadata, or provide "
-            "the exact saved owner/repo name when querying saved TechPulse records."
+            "the exact saved owner/repo name when querying saved AgentShield records."
         ),
     }
 
