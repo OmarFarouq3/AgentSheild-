@@ -43,6 +43,16 @@ function presentableAttackCases(cases: AttackCase[]) {
   })
 }
 
+function presentableAttackResults<T extends { category: string }>(results: T[]) {
+  let hallucinationShown = false
+  return results.filter(item => {
+    if (item.category !== HALLUCINATION_CATEGORY) return true
+    if (hallucinationShown) return false
+    hallucinationShown = true
+    return true
+  })
+}
+
 function statusLabel(value: boolean) {
   return value ? 'Operational' : 'Unavailable'
 }
@@ -191,7 +201,7 @@ function PresetEvaluation({ health, cases, suite, loading, suiteLoading, adaptiv
       <div className="section-heading"><div className="eyebrow">Controlled evaluation only</div><h2>Results &amp; explanations</h2><p>Results appear after a run in this session. Download the report to keep it before reloading.</p></div>
       {suite ? <>
         {suiteLoading && <p className="adaptive-warning">The results below belong to the previous run. They will update when the new report arrives.</p>}
-        <ResultOverview normal={suite.normal} defended={suite.defended} totalCases={displayedCases.length} />
+        <ResultOverview normal={suite.normal} defended={suite.defended} />
         <details className="panel preset-explanation"><summary>How to read these results</summary><p>The preset scorer checks simulated canary exposure and sensitive capabilities. Succeeded indicates the preset attack met its scoring rule; partial indicates an attempted sensitive capability or an attempt without an explicit block. Expand each mode’s evidence to see the reason.</p><p>Residual risk is a suite heuristic: (succeeded + 0.5 * partial) / total cases. It is not an estimate of real-world breach probability. Adaptive campaigns use different scoring and are reported separately.</p><p>{suite.residual_gap_note}</p><p>Recorded tool budget: {suite.max_tool_calls ?? suite.defended.max_tool_calls ?? 'Not recorded'}</p></details>
         <ResultTable normal={suite.normal} defended={suite.defended} />
       </> : <div className="panel adaptive-empty"><ShieldCheck size={28} /><h3>No preset results yet</h3><p>Run the preset evaluation above. Both modes’ outcomes, reasons, answers, and tool traces will appear here.</p></div>}
@@ -203,13 +213,23 @@ function PresetEvaluation({ health, cases, suite, loading, suiteLoading, adaptiv
 
 function HealthRow({ label, value, loading }: { label: string; value?: boolean; loading: boolean }) { return <div className="health-row"><span className="health-name"><span className={`health-orb ${value ? 'ok' : value === false ? 'bad' : 'pending'}`} />{label}</span><span className={`health-value ${value ? 'good' : value === false ? 'bad-text' : ''}`}>{loading ? 'Checking...' : value === undefined ? 'Unknown' : statusLabel(value)}{value && <Check size={14} />}</span></div> }
 
-function ResultOverview({ normal, defended, totalCases }: { normal: SuiteReport; defended: SuiteReport; totalCases: number }) {
-  return <div className="results-summary"><div><span>Blocked with defenses</span><strong>{defended.blocked}<small> / {totalCases}</small></strong><p>Cases stopped by the defended agent.</p></div><div><span>Still succeeded</span><strong>{defended.succeeded}<small> / {totalCases}</small></strong><p>Cases meeting the preset success rule.</p></div><div><span>Normal success rate</span><strong>{normal.attack_success_rate_percent.toFixed(1)}<small>%</small></strong><p>Baseline hygiene remains active.</p></div><div><span>Defended success rate</span><strong>{defended.attack_success_rate_percent.toFixed(1)}<small>%</small></strong><p>Attack success after defenses.</p></div></div>
+function ResultOverview({ normal, defended }: { normal: SuiteReport; defended: SuiteReport }) {
+  const displayedNormal = presentableAttackResults(normal.cases)
+  const displayedDefended = presentableAttackResults(defended.cases)
+  const totalCases = displayedDefended.length
+  const defendedBlocked = displayedDefended.filter(item => item.outcome.toLowerCase().includes('blocked')).length
+  const defendedSucceeded = displayedDefended.filter(item => item.outcome.toLowerCase().includes('succeeded')).length
+  const normalSucceeded = displayedNormal.filter(item => item.outcome.toLowerCase().includes('succeeded')).length
+  const defendedSuccessRate = totalCases ? (defendedSucceeded / totalCases) * 100 : 0
+  const normalSuccessRate = totalCases ? (normalSucceeded / totalCases) * 100 : 0
+  return <div className="results-summary"><div><span>Blocked with defenses</span><strong>{defendedBlocked}<small> / {totalCases}</small></strong><p>Cases stopped by the defended agent.</p></div><div><span>Still succeeded</span><strong>{defendedSucceeded}<small> / {totalCases}</small></strong><p>Cases meeting the preset success rule.</p></div><div><span>Normal success rate</span><strong>{normalSuccessRate.toFixed(1)}<small>%</small></strong><p>Baseline hygiene remains active.</p></div><div><span>Defended success rate</span><strong>{defendedSuccessRate.toFixed(1)}<small>%</small></strong><p>Attack success after defenses.</p></div></div>
 }
 
 function ResultTable({ normal, defended }: { normal: SuiteReport; defended: SuiteReport }) {
-  const defendedById = new Map(defended.cases.map(item => [item.case_id, item]))
-  return <div className="results-table-wrap"><div className="results-table-heading"><div><div className="eyebrow">Case-by-case evidence</div><h2>What went through?</h2></div><div className="outcome-legend"><span><CheckCircle2 size={14} /> Blocked</span><span><XCircle size={14} /> Succeeded</span><span><CircleDot size={14} /> Partial</span></div></div><div className="results-table-scroll"><table className="results-table"><thead><tr><th>Case</th><th>Attack</th><th>Normal mode</th><th>Defended mode</th><th>Evidence by mode</th></tr></thead><tbody>{normal.cases.map(item => { const defendedCase = defendedById.get(item.case_id); return <ResultRow key={item.case_id} normalCase={item} defendedCase={defendedCase} /> })}</tbody></table></div></div>
+  const displayedNormal = presentableAttackResults(normal.cases)
+  const displayedDefended = presentableAttackResults(defended.cases)
+  const defendedById = new Map(displayedDefended.map(item => [item.case_id, item]))
+  return <div className="results-table-wrap"><div className="results-table-heading"><div><div className="eyebrow">Case-by-case evidence</div><h2>What went through?</h2></div><div className="outcome-legend"><span><CheckCircle2 size={14} /> Blocked</span><span><XCircle size={14} /> Succeeded</span><span><CircleDot size={14} /> Partial</span></div></div><div className="results-table-scroll"><table className="results-table"><thead><tr><th>Case</th><th>Attack</th><th>Normal mode</th><th>Defended mode</th><th>Evidence by mode</th></tr></thead><tbody>{displayedNormal.map(item => { const defendedCase = displayedDefended.find(candidate => candidate.category === item.category && candidate.case_id === item.case_id) || defendedById.get(item.case_id); return <ResultRow key={item.case_id} normalCase={item} defendedCase={defendedCase} /> })}</tbody></table></div></div>
 }
 
 function ResultRow({ normalCase, defendedCase }: { normalCase: SuiteReport['cases'][number]; defendedCase?: SuiteReport['cases'][number] }) {
