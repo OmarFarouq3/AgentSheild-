@@ -9,7 +9,7 @@ from uuid import uuid4
 from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Request
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from evaluation.catalog import catalog_cases
 from evaluation.comparison import RESULT_ROOT, build_comparison, load_verified
@@ -18,6 +18,47 @@ router = APIRouter(prefix="/dashboard-api", tags=["AgentShield dashboard"])
 jobs = {}
 lock = threading.Lock()
 ROOT = Path(__file__).resolve().parents[1]
+chat_lock = threading.Lock()
+
+
+class ChatRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    message: str = Field(min_length=1, max_length=8000)
+    security_mode: Literal["baseline", "defended"]
+
+    @field_validator("message")
+    @classmethod
+    def nonempty_message(cls, value):
+        if not value.strip():
+            raise ValueError("Message must not be blank")
+        return value
+
+
+@router.post("/chat")
+def chat(payload: ChatRequest, request: Request):
+    origin = request.headers.get("origin")
+    if origin and origin != str(request.base_url).rstrip("/"):
+        raise HTTPException(403, "Chat must originate from this dashboard.")
+    if request.headers.get("content-type", "").split(";")[0] != "application/json":
+        raise HTTPException(415, "JSON required")
+    if not chat_lock.acquire(blocking=False):
+        raise HTTPException(409, "Another chat request is running. Wait for it to finish.")
+    try:
+        completed = subprocess.run(
+            [sys.executable, "-m", "frontend.chat_worker"],
+            input=payload.model_dump_json(), capture_output=True, text=True, encoding="utf-8",
+            cwd=ROOT, timeout=180, check=False,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+        )
+        if completed.returncode:
+            raise HTTPException(503, "Agent unavailable. Check local Ollama and retry.")
+        return json.loads(completed.stdout)
+    except subprocess.TimeoutExpired as exc:
+        raise HTTPException(504, "Agent request timed out. Please retry.") from exc
+    except (OSError, ValueError) as exc:
+        raise HTTPException(503, "Agent unavailable. Check local Ollama and retry.") from exc
+    finally:
+        chat_lock.release()
 
 
 @router.get("/data")

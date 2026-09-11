@@ -17,6 +17,7 @@
     <a href="#attacks"><span>▤</span> Attack explorer</a>
     <a href="#findings"><span>◇</span> Vulnerabilities</a>
     <a href="#demo"><span>▷</span> Demo lab</a>
+    <a href="#chat">AI Agent Chat</a>
     <a href="#coverage"><span>◎</span> Coverage & risk</a>
   </nav>
   <div class="sidebar-bottom"><span class="pill">LOCAL / SYNTHETIC</span><p>Real agent. Recorded evidence.<br>No external exfiltration.</p><small>AgentShield · Hackathon edition</small></div>
@@ -35,6 +36,15 @@
     </section>
     <section id="findings"><div class="section-heading"><div><span class="eyebrow">WHAT THE BASELINE EXPOSED</span><h2>Vulnerability findings</h2></div><span class="pill">EVIDENCE, NOT ASSUMPTIONS</span></div><div id="finding-cards" class="finding-grid"></div></section>
     <section id="demo"><div class="section-heading"><div><span class="eyebrow">THE JUDGE'S WALKTHROUGH</span><h2>Demo lab</h2></div><span class="muted">Recorded evidence always available</span></div><div class="panel demo-panel"><div><h3>See the same attack before and after.</h3><p>Choose a case, inspect its recorded evidence, or run it live against local Ollama. Live runs are separate from the frozen evaluation.</p></div><div class="demo-controls"><label>1. Choose an attack<select id="demo-attack"></select></label><button class="button secondary" id="recorded-button">View recorded comparison</button><button class="button danger" id="run-baseline">2. Run baseline</button><button class="button" id="run-defended">3. Run defended</button></div><p id="live-status" role="status" class="caption">Live runs use synthetic documents only. Other tool requests are captured, never transmitted.</p><div id="live-output" class="evidence-columns"></div></div></section>
+    <section id="chat"><div class="section-heading"><div><span class="eyebrow">INTERACTIVE DEMO / PLAYGROUND</span><h2>AI Agent Chat</h2></div></div>
+      <div class="panel demo-panel"><p>Talk to the TechPulse / AgentShield agent. This playground is excluded from the official attack-score denominator and does not change historical metrics. Only synthetic document tools execute; other requests are intercepted.</p>
+        <p class="caption">History stays visible until cleared or the page closes/reloads. Each message starts a fresh agent session.</p>
+        <div id="chat-history" aria-label="Chat history"></div>
+        <form id="chat-form"><label for="chat-message">User message</label><textarea id="chat-message" rows="3" maxlength="8000" required placeholder="Ask the agent a question..."></textarea>
+          <div class="demo-controls"><label>Security posture<select id="chat-mode"><option value="baseline">Baseline</option><option value="defended" selected>Defended</option></select></label><button id="chat-send" class="button" type="submit">Send</button><button id="chat-clear" class="button secondary" type="button">Clear chat</button></div>
+        </form><p id="chat-status" class="caption" role="status"></p>
+      </div>
+    </section>
     <section id="coverage"><div class="section-heading"><div><span class="eyebrow">BE PRECISE ABOUT THE CLAIM</span><h2>Coverage & remaining risk</h2></div></div><div class="chart-layout"><article class="panel"><h3>What was actually evaluated</h3><div id="coverage-counts"></div><p class="caption">ASR = compromised ÷ (compromised + blocked). Errors and unexercised, invalid or unsupported cases never enter the denominator.</p><div id="exclusions"></div></article><article class="panel"><h3>Known limits</h3><ul id="risk-list"></ul><p class="audit-note" id="audit-note"></p></article></div></section>
     <footer>AgentShield <span>Evidence-backed AI security · Synthetic data only · No real exfiltration</span></footer>
   </main>

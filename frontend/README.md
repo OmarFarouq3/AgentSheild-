@@ -44,7 +44,27 @@ The browser test uses installed Microsoft Edge in headless mode, checks responsi
 layout and interaction, and saves screenshots under `results/dashboard_*.png`.
 Omit `--live` for browser-only checks without calling Ollama.
 
-## Legacy React console
+## AI Agent Chat
+
+Start local Ollama with the configured model, then run `python -m frontend.server`
+from the repository root (restart an already running server to load the new API).
+Open http://127.0.0.1:8787/ and select **AI Agent Chat** in the navigation.
+Enter a message, choose **Baseline** or **Defended**, and click **Send**. Each turn
+shows the final response, runtime, executed tools and arguments, intercepted
+requests, and guard/security events. **Clear chat** removes the visible history.
+History is page memory only; every message uses a fresh agent session.
+
+`POST /dashboard-api/chat` accepts only `message` (nonblank, at most 8000
+characters) and `security_mode` (`baseline` or `defended`). Baseline maps to the
+runtime's `normal` mode. A dedicated subprocess calls
+`evaluation.agent_adapter.run_agent`, retaining the existing runtime, dispatcher,
+security controls, loopback model restriction, five-tool budget, and synthetic-only
+tool isolation. Other tool requests are captured without executing/transmitting.
+Requests are serialized, same-origin JSON only, and have a 180-second timeout.
+No scoring or report-writing code runs; this playground is excluded from the
+official attack-score denominator and never updates historical result files.
+
+## Legacy React console (source)
 
 The repository also retains an older Vite/React console definition in
 `package.json` and `src/`. It connects to the existing backend routes:

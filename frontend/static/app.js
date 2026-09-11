@@ -109,4 +109,38 @@ $("run-baseline").onclick = () => runLive("baseline");
 $("run-defended").onclick = () => runLive("defended");
 $("demo-attack").onchange = renderLive;
 document.querySelectorAll("nav a").forEach(link => link.addEventListener("click",() => { document.querySelectorAll("nav a").forEach(a => a.classList.remove("active")); link.classList.add("active"); }));
+let chatBusy = false;
+$("chat-clear").onclick = () => {
+  $("chat-history").replaceChildren();
+  $("chat-message").value = "";
+  $("chat-status").textContent = "";
+};
+$("chat-form").onsubmit = async event => {
+  event.preventDefault();
+  const message = $("chat-message").value.trim(), mode = $("chat-mode").value;
+  if (!message || chatBusy) return;
+  chatBusy = true;
+  ["chat-send", "chat-clear", "chat-mode", "chat-message"].forEach(id => $(id).disabled = true);
+  const turn = document.createElement("article");
+  turn.className = `evidence-pane ${mode}`;
+  turn.innerHTML = `<h3>${esc(mode.toUpperCase())} / Interactive demo</h3><h4>User message</h4><pre>${esc(message)}</pre>`;
+  $("chat-history").append(turn);
+  $("chat-status").textContent = "Agent running locally (up to three minutes)...";
+  try {
+    const result = await request("/dashboard-api/chat", {method:"POST", headers:{"Content-Type":"application/json"}, body:json({message, security_mode:mode})});
+    turn.insertAdjacentHTML("beforeend", `<h4>Agent final response</h4><pre>${esc(result.response)}</pre><p>Runtime: ${esc(result.latency_ms)} ms</p><details><summary>Executed tool calls and arguments (${result.tools_called.length})</summary><pre>${esc(json(result.tools_called))}</pre></details>`
+      + (result.intercepted_tool_calls.length ? `<details><summary>Intercepted requests (not transmitted)</summary><pre>${esc(json(result.intercepted_tool_calls))}</pre></details>` : "")
+      + (result.security_events.length ? `<details><summary>Guard / security events</summary><pre>${esc(json(result.security_events))}</pre></details>` : ""));
+    $("chat-message").value = "";
+    $("chat-status").textContent = "Response received. Historical metrics are unchanged.";
+  } catch (error) {
+    const failure = document.createElement("p");
+    failure.textContent = error.message;
+    turn.append(failure);
+    $("chat-status").textContent = "Chat request failed. You can retry.";
+  } finally {
+    chatBusy = false;
+    ["chat-send", "chat-clear", "chat-mode", "chat-message"].forEach(id => $(id).disabled = false);
+  }
+};
 load();
