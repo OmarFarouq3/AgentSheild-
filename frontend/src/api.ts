@@ -51,6 +51,7 @@ export type SuiteReport = {
 export type SuiteResponse = {
   normal: SuiteReport
   defended: SuiteReport
+  max_tool_calls?: number
   residual_risk_drop_percentage_points?: number
   residual_gap_note?: string
 }

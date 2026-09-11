@@ -117,26 +117,6 @@ services:
       timeout: 5s
       retries: 10
 
-  frontend:
-    profiles:
-      - frontend
-    build:
-      context: .
-      dockerfile: frontend_layer/Dockerfile
-    env_file:
-      - ${SECRETS_DIR:?Set SECRETS_DIR to your external secrets folder}/frontend_layer.env
-    environment:
-      PYTHONPATH: /app
-      FASTAPI_CHAT_URL: http://app:8000/chat
-      FASTAPI_SECURITY_SUITE_URL: http://app:8000/security/attack-suite
-      FASTAPI_ADAPTIVE_SUITE_URL: http://app:8000/security/adaptive-suite
-    command: chainlit run frontend_layer/app/chainlit_app.py --host 0.0.0.0 --port 8002
-    ports:
-      - "8002:8002"
-    depends_on:
-      app:
-        condition: service_healthy
-
 volumes:
   ollama_data:
   postgres_data:

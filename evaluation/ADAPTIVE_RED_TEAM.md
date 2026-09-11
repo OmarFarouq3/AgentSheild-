@@ -12,22 +12,12 @@ The original visual dashboard is available through Vite at
 http://127.0.0.1:5173. Start it from `frontend/` with `npm.cmd ci` and
 `npm.cmd run dev -- --host 127.0.0.1`, then open **Adaptive red team**.
 The API must be running on port 8000. See [frontend setup](../frontend/README.md).
-The Chainlit interface below remains available separately on port 8002.
-
-Start the existing local Ollama and application stack as described in
-[`agent/README.md`](../agent/README.md). In the Chainlit frontend, send:
-
-```text
-/run-adaptive-suite 6 model
-```
-
-This runs at most six pairs (12 target attempts), each with three tool calls
-and a 60-second timeout. Each model proposal has a 30-second timeout. For a
-feedback-driven tactic policy without model proposal calls, use:
-
-```text
-/run-adaptive-suite 6 policy
-```
+Start the local Ollama and application stack as described in
+[`agent/README.md`](../agent/README.md). In **Adaptive red team**, choose six
+rounds, **Local model + fallback**, and three tool calls, then run the campaign.
+This runs at most six pairs (12 target attempts), with a 60-second timeout per
+attempt and a 30-second timeout per model proposal. Choose **Feedback policy**
+for feedback-driven tactics without additional model proposal calls.
 
 Both modes still need the real target model. `policy` is not a simulated target.
 Missing or failing target execution is reported as incomplete, never as proof

@@ -18,8 +18,7 @@ are present, even if Ollama is offline.
 
 Shared routes are also installed in the existing TechPulse FastAPI app at
 `/dashboard` when imported with the repository package available. The optional
-standalone server avoids starting Postgres just to review JSON. Existing Chainlit
-chat and legacy suite endpoints are preserved.
+standalone server avoids starting Postgres just to review JSON. The chat and security suite API endpoints are preserved.
 
 The demo server binds to loopback. Live requests accept only fixed eligible attack
 IDs and baseline/defended modes, reject extra fields and cross-origin POSTs, and
@@ -46,10 +45,22 @@ Omit `--live` for browser-only checks without calling Ollama.
 
 ## Original obeid React console and adaptive red team
 
-The original visual console from `obeid-branch` is in `frontend/src/`. It now
-includes an **Adaptive red team** page with bounded campaign controls, live API
-execution, paired results, generation/fallback decisions, raw text evidence,
-and complete JSON download. Its reports are separate from historical metrics.
+The original visual console from `obeid-branch` is in `frontend/src/`. Its two
+primary testing pages keep controls, results, and explanations together:
+
+- **Preset evaluation** (`/`): run the fixed attack suite, compare normal and
+  defended outcomes, inspect both modes' answers and transcripts, browse the
+  preset attack list, and download the report. Results stay available while
+  switching pages, but a fresh load starts empty. Download before reloading to
+  keep a copy. The older `/results` URL opens this consolidated page too.
+- **Adaptive red team** (`/adaptive`): run an offensive campaign driven by prior
+  feedback, inspect generated prompts and fallback decisions, compare paired
+  results, and download the full evidence. Campaign state survives navigation
+  between pages in the current session; reloads clear it from the UI.
+
+Only one test method can run at a time in the console. Their scoring and reports
+remain separate. **Agent chat** is available as a secondary utility. The static
+artifact dashboard on port 8787 described above is a separate review tool.
 
 With the backend running on port 8000, use a second PowerShell terminal:
 
@@ -64,9 +75,8 @@ for a quick check or six to cover all categories and revisit observed gaps.
 The Vite `/api` proxy connects to the backend; no CORS changes are needed.
 `npm.cmd run build` checks TypeScript and builds the console.
 
-The console, evidence dashboard (8787), and Chainlit chat (8002) are separate
-interfaces. Starting the Docker frontend service starts Chainlit; start Vite
-as above to use the original visual console.
+The React console (5173) and artifact dashboard (8787) are separate interfaces.
+Docker starts the backend services; start Vite as above for the React console.
 
 Browser regression check (with Vite and backend running):
 

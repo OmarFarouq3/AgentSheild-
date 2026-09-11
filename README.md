@@ -25,8 +25,8 @@ separate from the frozen evaluation below. See the
 [adaptive guide](evaluation/ADAPTIVE_RED_TEAM.md) and
 [frontend guide](frontend/README.md) for setup and limits.
 
-The recorded-evidence dashboard on port **8787** and optional Chainlit chat on
-port **8002** are separate interfaces; starting Chainlit does not start React.
+The recorded-evidence dashboard on port **8787** is a separate review interface.
+Start Vite as above to use the React console.
 
 ## Measured outcome
 
@@ -134,8 +134,8 @@ flowchart LR
 The existing TechPulse API also installs `/dashboard` and `/dashboard-api` when
 the repository dashboard package is available. Its normal database startup still
 applies. The lightweight `frontend.server` uses the same routes without that
-dependency. Teammates' Chainlit `/run-security-suite` remains a separate demo with
-its legacy scoring; it is not the source for these dashboard metrics.
+dependency. The API preset suite uses its own scoring; it is not the source
+for these recorded dashboard metrics.
 
 ## Defenses and measurement
 

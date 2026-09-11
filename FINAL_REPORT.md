@@ -138,8 +138,7 @@ are never rendered. Live results cannot overwrite historical artifacts.
 
 Routes are shared with the existing TechPulse FastAPI app when the root dashboard
 package is available. A lightweight loopback server exposes the same dashboard
-without requiring Postgres startup. Existing Chainlit UI and legacy suite routes
-remain untouched. Their legacy scoring is not used for the final dashboard ASR.
+without requiring Postgres startup. Existing chat and security suite API routes remain available. Their legacy scoring is not used for the final dashboard ASR.
 
 Existing teammate `_sha256` logic is reused for per-record evidence hashes in the
 comparison. Original versioned artifact writer/tests are preserved. No blockchain
@@ -164,7 +163,7 @@ was added. Hashes support change detection, not tamper-proof signatures.
 
 Intentionally preserved: all original attack JSON, Day 2 historical report,
 the six baseline artifacts, catalog adaptations/scoring semantics, employee/demo
-adapter, Chainlit UI, external MCP implementations, Postgres code, teammate
+adapter, external MCP implementations, Postgres code, teammate
 security-result store, and legacy suite scoring/tests. No unrelated files removed.
 
 ## Verification

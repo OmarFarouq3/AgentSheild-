@@ -35,11 +35,11 @@ curl -X POST http://localhost:8000/security/attack-suite \
   -d '{"max_tool_calls":3}'
 ```
 
-The optional Chainlit UI exposes the same demo with `/run-security-suite`. Keep `SECURITY_HARNESS_API_ENABLED=true` only for local hackathon demonstrations; set it to `false` when the demo endpoint is not needed.
+The React console exposes the same demo in **Preset evaluation**. Keep `SECURITY_HARNESS_API_ENABLED=true` only for local hackathon demonstrations; set it to `false` when the demo endpoint is not needed.
 
 ### Adaptive red team
 
-Run `/run-adaptive-suite 6 model` in Chainlit or POST to
+Open **Adaptive red team** in the React console or POST to
 `/security/adaptive-suite` to generate feedback-driven attacks against both
 postures. The same candidate runs unchanged in each posture, with fresh target
 sessions and synthetic-only tool execution. The frontend shows every candidate,
@@ -88,12 +88,6 @@ mcp_layer/               MCP servers, clients, RAG, and MCP tool wrappers
   Dockerfile             MCP container definition
   .env.example           MCP environment template
 
-frontend_layer/          Chainlit UI layer
-  app/                   Chainlit app and frontend config
-  README.md              Frontend layer guide
-  Dockerfile             Frontend container definition
-  .env.example           Frontend environment template
-
 external secrets folder  Local env files kept outside this workspace
 
 logs/                    Runtime logs, ignored by git
@@ -109,7 +103,6 @@ Create local environment files outside this workspace from the templates:
 mkdir -p /absolute/path/to/external/secrets
 cp agent_layer/.env.example /absolute/path/to/external/secrets/agent_layer.env
 cp mcp_layer/.env.example /absolute/path/to/external/secrets/mcp_layer.env
-cp frontend_layer/.env.example /absolute/path/to/external/secrets/frontend_layer.env
 ```
 
 No LLM API key is required. The templates already select `qwen3.5:4b` for chat and `nomic-embed-text:v1.5` for embeddings. `GITHUB_TOKEN` remains optional for public GitHub requests. Docker Compose overrides `OLLAMA_BASE_URL` so the application containers use the local Ollama service.
@@ -140,13 +133,8 @@ Core SRS services started by default:
 - Qdrant: `http://localhost:6333`
 - PostgreSQL: `localhost:5432`
 
-Optional Chainlit frontend:
-
-```bash
-docker compose --profile frontend up --build
-```
-
-Then open `http://localhost:8002`.
+Start the React console separately using the [frontend guide](../frontend/README.md).
+It connects to the backend on port 8000 and serves the dashboard on port 5173.
 
 Useful Docker commands:
 
@@ -205,11 +193,15 @@ python -m mcp_layer.services.index_documents
 uvicorn mcp_layer.server:app --reload --host 0.0.0.0 --port 8001
 ```
 
-Start the Chainlit frontend:
+Start the React console from the repository root in another terminal:
 
 ```bash
-chainlit run frontend_layer/app/chainlit_app.py -w --host 0.0.0.0 --port 8002
+cd frontend
+npm ci
+npm run dev -- --host 127.0.0.1
 ```
+
+Open `http://127.0.0.1:5173`.
 
 ## API examples
 

@@ -8,7 +8,7 @@
 
 For the new feedback-driven paired agent, see
 [Adaptive red team demonstration](ADAPTIVE_RED_TEAM.md). It runs through
-`python -m evaluation.adaptive_runner`, the API, or Chainlit, and retains separate
+`python -m evaluation.adaptive_runner`, the API, or the React console, and retains separate
 versioned evidence. The catalog CLI documented below remains unchanged.
 
 Run from `AgentSheild-`, with the target dependencies installed and the configured

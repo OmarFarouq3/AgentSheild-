@@ -50,9 +50,55 @@ def main():
         errors, beacons, pending = [], [], []
         page.on("pageerror", lambda error: errors.append(str(error)))
         page.on("request", lambda request: beacons.append(request.url) if "beacon.invalid" in request.url else None)
+        page.route("**/api/health", lambda route: route.fulfill(json={"status": "healthy", "agent": True, "qdrant": True, "postgres": True, "version": "test"}))
+        normal_case = {**report["rounds"][0]["attempts"]["normal"], "answer": "Normal preset answer"}
+        defended_case = {**normal_case, "answer": "Defended preset answer"}
+        preset = {"normal": {**report["normal"], "mode": "normal", "cases": [normal_case]},
+                  "defended": {**report["normal"], "mode": "defended", "cases": [defended_case]},
+                  "max_tool_calls": 4, "residual_gap_note": "Preset fixture explanation."}
+        page.route("**/api/security/attack-cases", lambda route: route.fulfill(json={"attack_cases": [normal_case]}))
+        preset_pending = []
+        page.route("**/api/security/attack-suite", lambda route: preset_pending.append(route))
+        # Previously cached reports must not populate a fresh page.
+        page.add_init_script("localStorage.setItem('agentshield-latest-suite', " + json.dumps(json.dumps(preset)) + ")")
         page.goto("http://127.0.0.1:5173")
-        expect(page.get_by_role("heading", name="Security posture", exact=True)).to_be_visible()
+        expect(page.get_by_role("heading", name="Preset evaluation", exact=True)).to_be_visible()
+        expect(page.get_by_role("heading", name="No preset results yet", exact=True)).to_be_visible()
+        page.get_by_label("Preset tool budget", exact=True).select_option("4")
+        page.get_by_role("button", name="Run preset evaluation", exact=True).click()
+        expect(page.get_by_role("button", name="Preset suite running...", exact=True)).to_be_disabled()
+        page.get_by_role("button", name="Adaptive red team", exact=True).click()
+        expect(page.get_by_role("button", name="Run adaptive campaign", exact=True)).to_be_disabled()
+        assert preset_pending[0].request.post_data_json == {"max_tool_calls": 4}
+        preset_pending[0].fulfill(json=preset)
+        expect(page.get_by_role("button", name="Run adaptive campaign", exact=True)).to_be_enabled()
+        page.get_by_role("button", name="Preset evaluation", exact=True).click()
+        page.get_by_text("Normal evidence", exact=True).click()
+        page.get_by_text("Defended evidence", exact=True).click()
+        expect(page.get_by_text("Normal preset answer", exact=True)).to_be_visible()
+        expect(page.get_by_text("Defended preset answer", exact=True)).to_be_visible()
+        page.get_by_text("How to read these results", exact=True).click()
+        expect(page.get_by_text("Recorded tool budget: 4", exact=True)).to_be_visible()
+        with page.expect_download() as event:
+            page.get_by_role("button", name="Download preset JSON", exact=True).click()
+        assert json.loads(Path(event.value.path()).read_text(encoding="utf-8")) == preset
+        page.get_by_role("button", name="Run preset evaluation", exact=True).click()
+        expect(page.get_by_text("The results below belong to the previous run.", exact=False)).to_be_visible()
+        expect(page.get_by_role("button", name="Preset suite running...", exact=True)).to_be_disabled()
+        page.wait_for_timeout(100)
+        preset_pending[-1].fulfill(status=503, json={"detail": "Preset test service unavailable"})
+        expect(page.get_by_text("Preset test service unavailable", exact=True)).to_be_visible()
+        expect(page.get_by_role("button", name="Run preset evaluation", exact=True)).to_be_enabled()
+        expect(page.get_by_text("Normal preset answer", exact=True)).to_be_visible()
+        page.locator('#preset-cases > summary').click()
+        page.get_by_placeholder("Filter attack cases").fill("does-not-match")
+        expect(page.get_by_text("No attack cases match that filter.", exact=True)).to_be_visible()
+        page.get_by_placeholder("Filter attack cases").fill("")
         page.screenshot(path=str(root / "original_console.png"), full_page=True)
+        page.set_viewport_size({"width": 390, "height": 844})
+        assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth"), "Preset mobile page overflows"
+        page.screenshot(path=str(root / "preset_mobile.png"), full_page=True)
+        page.set_viewport_size({"width": 1440, "height": 1000})
         page.get_by_role("button", name="Adaptive red team", exact=True).click()
         expect(page.get_by_role("heading", name="Adaptive red team", exact=True)).to_be_visible()
         page.get_by_label("Adaptive rounds", exact=True).select_option("2")
@@ -61,8 +107,10 @@ def main():
         page.get_by_role("button", name="Run adaptive campaign", exact=True).click()
         expect(page.get_by_role("button", name="Campaign running…", exact=True)).to_be_disabled()
         # Navigation must not discard an in-flight request or permit an overlapping suite.
-        page.get_by_role("button", name="Overview", exact=True).click()
-        expect(page.get_by_role("button", name="Running suite...", exact=True)).to_be_disabled()
+        page.get_by_role("button", name="Preset evaluation", exact=True).click()
+        expect(page.get_by_role("button", name="Run preset evaluation", exact=True)).to_be_disabled()
+        expect(page.get_by_text("An adaptive campaign is running.", exact=False)).to_be_visible()
+        expect(page.get_by_role("heading", name="Campaign incomplete", exact=True)).not_to_be_visible()
         page.get_by_role("button", name="Adaptive red team", exact=True).click()
         assert pending and pending[0].request.post_data_json == {
             "rounds": 2, "generator": "policy", "max_tool_calls": 3, "attempt_timeout_seconds": 60,
@@ -82,8 +130,23 @@ def main():
         assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth"), "Mobile page overflows"
         page.screenshot(path=str(root / "adaptive_mobile.png"), full_page=True)
         page.unroute("**/api/security/adaptive-suite")
+        page.set_viewport_size({"width": 1440, "height": 1000})
+        page.get_by_role("button", name="Preset evaluation", exact=True).click()
+        page.go_back()
+        expect(page.get_by_role("heading", name="Campaign incomplete", exact=True)).to_be_visible()
+        page.go_forward()
+        expect(page.get_by_role("heading", name="Preset evaluation", exact=True)).to_be_visible()
+        expect(page.get_by_role("button", name="Download preset JSON", exact=True)).to_be_visible()
+        page.reload()
+        expect(page.get_by_role("heading", name="No preset results yet", exact=True)).to_be_visible()
+        expect(page.get_by_role("button", name="Download preset JSON", exact=True)).not_to_be_visible()
+        page.goto("http://127.0.0.1:5173/results")
+        expect(page.get_by_role("heading", name="Preset evaluation", exact=True)).to_be_visible()
+        expect(page.get_by_role("heading", name="No preset results yet", exact=True)).to_be_visible()
+        page.get_by_role("button", name="Adaptive red team", exact=True).click()
         if args.live:
             page.set_viewport_size({"width": 1440, "height": 1000})
+            page.get_by_label("Adaptive rounds", exact=True).select_option("2")
             page.get_by_label("Attack generator", exact=True).select_option("model")
             with page.expect_response(lambda response: response.url.endswith('/security/adaptive-suite')
                                       and response.request.method == 'POST', timeout=330000) as event:
@@ -101,7 +164,7 @@ def main():
                               "sources": [r["generation"]["source"] for r in live["rounds"]]}))
         assert not errors, errors
         browser.close()
-    print("React browser checks passed: original console, adaptive controls, navigation, incomplete coverage, inert evidence, download, mobile" + (", live campaign" if args.live else ""))
+    print("React browser checks passed: preset run and paired evidence, separate methods, mutual exclusion, navigation and history, fresh loads ignore cached reports, adaptive controls, incomplete coverage, inert evidence, downloads, mobile" + (", live campaign" if args.live else ""))
 
 
 if __name__ == "__main__":

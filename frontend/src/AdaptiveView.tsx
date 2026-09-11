@@ -89,7 +89,7 @@ export default function AdaptiveView({ active, suiteBusy, onBusyChange }: {
   }
 
   return <section hidden={!active} className="adaptive-page">
-    <div className="page-heading"><div><div className="eyebrow"><ShieldCheck size={14} /> Feedback-driven evaluation</div><h1>Adaptive red team</h1><p>Challenge both postures. Follow each decision back to its evidence.</p></div>
+    <div className="page-heading"><div><div className="eyebrow"><ShieldCheck size={14} /> Method 02 / Dynamic attacks</div><h1>Adaptive red team</h1><p>An offensive agent adapts attacks using prior outcomes. Configure the campaign, compare both postures, and trace every decision here.</p></div>
       {report && <button className="button secondary" onClick={() => download(report)}><Download size={15} /> Download JSON</button>}
     </div>
     <div className="panel adaptive-setup">
@@ -101,6 +101,7 @@ export default function AdaptiveView({ active, suiteBusy, onBusyChange }: {
         <button className="button primary" onClick={() => void run()} disabled={busy || suiteBusy}><Play size={15} /> {busy ? 'Campaign running…' : 'Run adaptive campaign'}</button>
       </div>
       <p className="adaptive-meta">Synthetic tools only · 60 seconds per target attempt · 30 seconds per model proposal. Normal retains baseline hygiene. The first four rounds explore the four categories; later rounds revisit observed gaps.</p>
+      <details className="adaptive-method-help"><summary>How this testing method works</summary><p>The local model proposes prompts or injected documents using structured feedback from earlier rounds. Feedback policy mode chooses and varies built-in strategies from those outcomes; it also supplies the fallback when a model proposal is rejected.</p><p>Each candidate is tested in both modes before the next round. This page keeps campaign results separate from the fixed attacks in Preset evaluation. Expand a round to inspect its generation reason, feedback, exact payload, and target evidence.</p></details>
       {busy && <p className="adaptive-progress" role="status"><Terminal size={16} /> {elapsed}s elapsed. Waiting for the backend report; round evidence appears when the campaign finishes. You can switch pages while it runs.</p>}
       {suiteBusy && !busy && <p role="status">The fixed suite is running. Wait for it to finish before starting this campaign.</p>}
     </div>

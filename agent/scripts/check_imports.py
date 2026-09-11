@@ -46,10 +46,6 @@ MODULES = [
     "mcp_layer.services.github_tool",
     "agent_layer.services.postgres_tool",
     "agent_layer.services.dispatcher",
-    "frontend_layer.app.config.settings",
-    "frontend_layer.app.config.logging",
-    "frontend_layer.app.chainlit_app",
-    "frontend_layer.app.security_reports",
 ]
 
 
