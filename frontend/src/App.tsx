@@ -31,6 +31,17 @@ type View = 'preset' | 'chat' | 'adaptive' | 'defenses'
 const viewFromPath = (): View => window.location.pathname === '/defenses' ? 'defenses' : window.location.pathname === '/adaptive' ? 'adaptive' : window.location.pathname === '/chat' ? 'chat' : 'preset'
 
 const sessionId = crypto.randomUUID()
+const HALLUCINATION_CATEGORY = 'cybersecurity_hallucination'
+
+function presentableAttackCases(cases: AttackCase[]) {
+  let hallucinationShown = false
+  return cases.filter(item => {
+    if (item.category !== HALLUCINATION_CATEGORY) return true
+    if (hallucinationShown) return false
+    hallucinationShown = true
+    return true
+  })
+}
 
 function statusLabel(value: boolean) {
   return value ? 'Operational' : 'Unavailable'
@@ -157,6 +168,8 @@ function PresetEvaluation({ health, cases, suite, loading, suiteLoading, adaptiv
   suiteLoading: boolean; adaptiveBusy: boolean; maxToolCalls: number;
   setMaxToolCalls: (value: number) => void; runSuite: () => void
 }) {
+  const displayedCases = presentableAttackCases(cases)
+
   return <div className="preset-page">
     <section className="page-heading">
       <div><div className="eyebrow"><LockKeyhole size={14} /> Method 01 / Controlled tests</div><h1>Preset evaluation</h1><p>A fixed list of attacks, repeated against normal and defended modes. Run the suite, compare outcomes, and inspect the evidence here.</p></div>
@@ -165,7 +178,7 @@ function PresetEvaluation({ health, cases, suite, loading, suiteLoading, adaptiv
     <div className="panel adaptive-setup">
       <div><h2>Run the preset suite</h2><p>The harness uses predefined synthetic cases. Prompts stay fixed across runs; model responses can vary.</p></div>
       <div className="adaptive-controls">
-        <div className="preset-scope"><strong>{cases.length || '--'}</strong><span>preset cases / each tested in both modes</span></div>
+        <div className="preset-scope"><strong>{displayedCases.length || '--'}</strong><span>preset cases / each tested in both modes</span></div>
         <label>Tool budget<select aria-label="Preset tool budget" value={maxToolCalls} disabled={suiteLoading || adaptiveBusy} onChange={event => setMaxToolCalls(Number(event.target.value))}>{[1, 2, 3, 4, 5].map(value => <option key={value} value={value}>{value} per attempt</option>)}</select></label>
         <button className="button primary" onClick={runSuite} disabled={suiteLoading || adaptiveBusy || loading || !cases.length}><Play size={15} />{suiteLoading ? 'Preset suite running...' : 'Run preset evaluation'}</button>
       </div>
@@ -173,7 +186,7 @@ function PresetEvaluation({ health, cases, suite, loading, suiteLoading, adaptiv
       {suiteLoading && <p className="adaptive-progress" role="status"><Terminal size={16} />Waiting for the backend report. You can switch testing methods while it runs.</p>}
       {adaptiveBusy && <p role="status">An adaptive campaign is running. Preset evaluation will be available when it finishes.</p>}
     </div>
-    <nav className="preset-sections" aria-label="Preset page sections"><a href="#preset-results">Results &amp; explanations</a><a href="#preset-cases">Preset attack list ({cases.length})</a><a href="#preset-health">Dependency health</a></nav>
+    <nav className="preset-sections" aria-label="Preset page sections"><a href="#preset-results">Results &amp; explanations</a><a href="#preset-cases">Preset attack list ({displayedCases.length})</a><a href="#preset-health">Dependency health</a></nav>
     <section id="preset-results" className="preset-results">
       <div className="section-heading"><div className="eyebrow">Controlled evaluation only</div><h2>Results &amp; explanations</h2><p>Results appear after a run in this session. Download the report to keep it before reloading.</p></div>
       {suite ? <>
@@ -183,7 +196,7 @@ function PresetEvaluation({ health, cases, suite, loading, suiteLoading, adaptiv
         <ResultTable normal={suite.normal} defended={suite.defended} />
       </> : <div className="panel adaptive-empty"><ShieldCheck size={28} /><h3>No preset results yet</h3><p>Run the preset evaluation above. Both modes’ outcomes, reasons, answers, and tool traces will appear here.</p></div>}
     </section>
-    <details id="preset-cases" className="panel preset-catalog"><summary>Preset attack list <span>{cases.length} fixed cases</span></summary><AttackLibrary cases={cases} /></details>
+    <details id="preset-cases" className="panel preset-catalog"><summary>Preset attack list <span>{displayedCases.length} fixed cases</span></summary><AttackLibrary cases={displayedCases} /></details>
     <details id="preset-health" className="panel preset-health"><summary>Dependency health <span>{loading ? 'Checking...' : health?.status ?? 'Unavailable'}</span></summary><div className="health-list"><HealthRow label="Agent runtime" value={health?.agent} loading={loading} /><HealthRow label="Qdrant vector store" value={health?.qdrant} loading={loading} /><HealthRow label="PostgreSQL" value={health?.postgres} loading={loading} /></div></details>
   </div>
 }

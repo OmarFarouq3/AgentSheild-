@@ -56,7 +56,12 @@ def main():
         preset = {"normal": {**report["normal"], "mode": "normal", "cases": [normal_case]},
                   "defended": {**report["normal"], "mode": "defended", "cases": [defended_case]},
                   "max_tool_calls": 4, "residual_gap_note": "Preset fixture explanation."}
-        page.route("**/api/security/attack-cases", lambda route: route.fulfill(json={"attack_cases": [normal_case]}))
+        attack_cases = [
+            {**normal_case, "case_id": f"CASE-{index:03d}",
+             "category": "cybersecurity_hallucination" if index <= 5 else f"category_{index}"}
+            for index in range(1, 10)
+        ]
+        page.route("**/api/security/attack-cases", lambda route: route.fulfill(json={"attack_cases": attack_cases}))
         preset_pending = []
         page.route("**/api/security/attack-suite", lambda route: preset_pending.append(route))
         # Previously cached reports must not populate a fresh page.
@@ -64,6 +69,8 @@ def main():
         page.goto("http://127.0.0.1:5173")
         expect(page.get_by_role("heading", name="Preset evaluation", exact=True)).to_be_visible()
         expect(page.get_by_role("heading", name="No preset results yet", exact=True)).to_be_visible()
+        expect(page.locator(".preset-scope strong")).to_have_text("5")
+        expect(page.locator("#preset-cases > summary")).to_contain_text("5 fixed cases")
         page.get_by_role("button", name="How defenses work", exact=True).click()
         expect(page.get_by_role("heading", name="How defenses work", exact=True)).to_be_visible()
         expect(page.get_by_role("list", name="Defensive request flow")).to_be_visible()
