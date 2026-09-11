@@ -31,6 +31,11 @@ MODULES = [
     "agent_layer.services.security_controls",
     "agent_layer.services.security_documents",
     "agent_layer.services.security_harness",
+    "agent_layer.services.adaptive_scope",
+    "agent_layer.services.adaptive_generator",
+    "agent_layer.services.adaptive_scoring",
+    "agent_layer.services.adaptive_harness",
+    "agent_layer.services.adaptive_result_store",
     "mcp_layer.services.client",
     "mcp_layer.services.index_documents",
     "mcp_layer.services.ollama_embeddings",
@@ -44,6 +49,7 @@ MODULES = [
     "frontend_layer.app.config.settings",
     "frontend_layer.app.config.logging",
     "frontend_layer.app.chainlit_app",
+    "frontend_layer.app.security_reports",
 ]
 
 

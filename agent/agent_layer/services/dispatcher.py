@@ -6,6 +6,7 @@ from typing import Any
 
 from agent_layer.config.logging import get_logger, get_request_id
 from agent_layer.config.settings import get_settings
+from agent_layer.services.adaptive_scope import intercept_tool
 from agent_layer.services.postgres_tool import query_saved_repositories
 from agent_layer.services.security_controls import (
     SENSITIVE_TOOL_NAME,
@@ -73,6 +74,12 @@ async def execute_tool(tool_name: str, arguments: dict[str, Any]) -> Any:
 
     settings = get_settings()
     assert_tool_allowed(tool_name, arguments)
+
+    if intercept_tool(tool_name):
+        return {
+            "evaluation_intercepted": True,
+            "content": "Evaluation transport captured this request. It was not executed or transmitted.",
+        }
 
     if tool_name == UNTRUSTED_DOCUMENT_TOOL_NAME:
         return read_partner_brief()

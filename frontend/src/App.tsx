@@ -25,9 +25,10 @@ import {
   X,
 } from 'lucide-react'
 import { api, type AttackCase, type ChatResponse, type Health, type SuiteReport, type SuiteResponse } from './api'
+import AdaptiveView from './AdaptiveView'
 
 type Message = { role: 'user' | 'assistant'; text: string; meta?: ChatResponse }
-type View = 'overview' | 'chat' | 'attacks' | 'results'
+type View = 'overview' | 'chat' | 'attacks' | 'results' | 'adaptive'
 
 const sessionId = crypto.randomUUID()
 
@@ -47,12 +48,13 @@ function statusLabel(value: boolean) {
 }
 
 function App() {
-  const [view, setView] = useState<View>(window.location.pathname === '/results' ? 'results' : 'overview')
+  const [view, setView] = useState<View>(window.location.pathname === '/adaptive' ? 'adaptive' : window.location.pathname === '/results' ? 'results' : 'overview')
   const [health, setHealth] = useState<Health | null>(null)
   const [cases, setCases] = useState<AttackCase[]>([])
   const [suite, setSuite] = useState<SuiteResponse | null>(() => readStoredSuite())
   const [loading, setLoading] = useState(true)
   const [suiteLoading, setSuiteLoading] = useState(false)
+  const [adaptiveLoading, setAdaptiveLoading] = useState(false)
   const [error, setError] = useState('')
   const [mobileNav, setMobileNav] = useState(false)
   const [maxToolCalls, setMaxToolCalls] = useState(3)
@@ -74,6 +76,7 @@ function App() {
   useEffect(() => { void refresh() }, [])
 
   const runSuite = async () => {
+    if (suiteLoading || adaptiveLoading) return
     setSuiteLoading(true)
     setError('')
     try {
@@ -114,6 +117,7 @@ function App() {
             <NavButton icon={<Bot size={17} />} label="Agent chat" active={view === 'chat'} onClick={() => navigate('chat')} />
             <NavButton icon={<AlertTriangle size={17} />} label="Attack library" active={view === 'attacks'} onClick={() => navigate('attacks')} badge={cases.length || undefined} />
             <NavButton icon={<FileText size={17} />} label="Suite results" active={view === 'results'} onClick={() => navigate('results')} />
+            <NavButton icon={<ShieldCheck size={17} />} label="Adaptive red team" active={view === 'adaptive'} onClick={() => navigate('adaptive')} />
           </nav>
           <div className="sidebar-bottom">
             <div className="environment-label">Environment</div>
@@ -126,10 +130,11 @@ function App() {
         <main className="main-content">
           <button className="mobile-menu" onClick={() => setMobileNav(true)}><Menu size={19} /> Menu</button>
           {error && <div className="error-banner"><AlertTriangle size={17} /><span>{error}</span><button onClick={() => setError('')}><X size={16} /></button></div>}
-          {view === 'overview' && <Overview health={health} cases={cases} suite={suite} loading={loading} suiteLoading={suiteLoading} maxToolCalls={maxToolCalls} setMaxToolCalls={setMaxToolCalls} runSuite={runSuite} navigate={navigate} />}
+          {view === 'overview' && <Overview health={health} cases={cases} suite={suite} loading={loading} suiteLoading={suiteLoading || adaptiveLoading} maxToolCalls={maxToolCalls} setMaxToolCalls={setMaxToolCalls} runSuite={runSuite} navigate={navigate} />}
           {view === 'chat' && <ChatView />}
           {view === 'attacks' && <AttackLibrary cases={cases} />}
           {view === 'results' && <ResultsPage />}
+          <AdaptiveView active={view === 'adaptive'} suiteBusy={suiteLoading} onBusyChange={setAdaptiveLoading} />
         </main>
       </div>
     </div>

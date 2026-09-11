@@ -224,6 +224,7 @@ __marimo__/
 
 # React/Vite frontend generated files
 frontend/node_modules/
+/.chainlit/
 frontend/dist/
 frontend/*.tsbuildinfo
 frontend/vite.config.js

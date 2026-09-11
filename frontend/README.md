@@ -44,15 +44,46 @@ The browser test uses installed Microsoft Edge in headless mode, checks responsi
 layout and interaction, and saves screenshots under `results/dashboard_*.png`.
 Omit `--live` for browser-only checks without calling Ollama.
 
-## Legacy React console
+## Original obeid React console and adaptive red team
 
-The repository also retains an older Vite/React console definition in
-`package.json` and `src/`. It connects to the existing backend routes:
+The original visual console from `obeid-branch` is in `frontend/src/`. It now
+includes an **Adaptive red team** page with bounded campaign controls, live API
+execution, paired results, generation/fallback decisions, raw text evidence,
+and complete JSON download. Its reports are separate from historical metrics.
+
+With the backend running on port 8000, use a second PowerShell terminal:
+
+```powershell
+cd C:\Users\mahou\AgentSheild-\frontend
+npm.cmd ci
+npm.cmd run dev -- --host 127.0.0.1
+```
+
+Visit **http://127.0.0.1:5173** and select **Adaptive red team**. Choose two rounds
+for a quick check or six to cover all categories and revisit observed gaps.
+The Vite `/api` proxy connects to the backend; no CORS changes are needed.
+`npm.cmd run build` checks TypeScript and builds the console.
+
+The console, evidence dashboard (8787), and Chainlit chat (8002) are separate
+interfaces. Starting the Docker frontend service starts Chainlit; start Vite
+as above to use the original visual console.
+
+Browser regression check (with Vite and backend running):
+
+```powershell
+# From the repository root
+python -m pip install -r frontend/requirements-test.txt
+python -m frontend.test_react_browser
+# Also run a real two-round adaptive campaign:
+python -m frontend.test_react_browser --live
+```
+
+The Vite/React console connects to these backend routes:
 
 - `GET /health`
 - `GET /security/attack-cases`
 - `POST /security/attack-suite`
 - `POST /chat`
+- `POST /security/adaptive-suite`
 
-The current hackathon evidence dashboard described above is the supported local
-demo surface and does not require the Node toolchain.
+The artifact dashboard described above remains available without the Node toolchain.

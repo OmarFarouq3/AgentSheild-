@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field, field_validator
+from typing import Literal
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class ChatRequest(BaseModel):
@@ -44,3 +46,14 @@ class SecuritySuiteRequest(BaseModel):
     """Bounded configuration for the controlled hackathon attack suite."""
 
     max_tool_calls: int = Field(default=3, ge=1, le=5)
+
+
+class AdaptiveSuiteRequest(BaseModel):
+    """Hard bounds for a paired adaptive campaign (at most 24 target attempts)."""
+
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+    rounds: int = Field(default=4, ge=1, le=12)
+    max_tool_calls: int = Field(default=3, ge=1, le=5)
+    generator: Literal["model", "policy"] = "model"
+    attempt_timeout_seconds: int = Field(default=60, ge=5, le=120)

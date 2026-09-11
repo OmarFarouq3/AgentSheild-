@@ -37,6 +37,21 @@ curl -X POST http://localhost:8000/security/attack-suite \
 
 The optional Chainlit UI exposes the same demo with `/run-security-suite`. Keep `SECURITY_HARNESS_API_ENABLED=true` only for local hackathon demonstrations; set it to `false` when the demo endpoint is not needed.
 
+### Adaptive red team
+
+Run `/run-adaptive-suite 6 model` in Chainlit or POST to
+`/security/adaptive-suite` to generate feedback-driven attacks against both
+postures. The same candidate runs unchanged in each posture, with fresh target
+sessions and synthetic-only tool execution. The frontend shows every candidate,
+generation/fallback decision, control event, result, and trace, plus a full JSON
+download. `policy` selects tactics from feedback without additional attacker
+model calls; both options execute the real target model.
+
+See the [adaptive demo and evidence guide](../evaluation/ADAPTIVE_RED_TEAM.md)
+for commands, limits, artifacts, accurate scoring definitions, and limitations.
+The fixed demo and standalone catalog remain available with their existing
+scoring; compare rates within a suite rather than mixing their definitions.
+
 ### AgentShield adapter
 
 For an external AgentShield evaluator, import the standalone synchronous adapter:

@@ -6,6 +6,28 @@ AgentShield red-teams the real TechPulse AI agent, captures tool-level evidence,
 and compares baseline and defended security behavior. Qwen 3.5 4B runs locally
 through Ollama. Every confidential document and canary is synthetic.
 
+## Original visual console and adaptive agent
+
+The original dashboard from `obeid-branch` is the React console at
+**http://127.0.0.1:5173**. With the backend running on port 8000, start it in a
+separate terminal:
+
+```powershell
+cd frontend
+npm.cmd ci
+npm.cmd run dev -- --host 127.0.0.1
+```
+
+Open **Adaptive red team** to run paired, feedback-driven attacks and inspect
+generation decisions, injected documents, controls, outcomes, and full traces.
+Its JSON report downloads include both postures. These campaign results are
+separate from the frozen evaluation below. See the
+[adaptive guide](evaluation/ADAPTIVE_RED_TEAM.md) and
+[frontend guide](frontend/README.md) for setup and limits.
+
+The recorded-evidence dashboard on port **8787** and optional Chainlit chat on
+port **8002** are separate interfaces; starting Chainlit does not start React.
+
 ## Measured outcome
 
 | Recorded posture | Valid attacks | Compromised | Blocked | ASR |

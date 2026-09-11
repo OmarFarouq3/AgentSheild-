@@ -55,6 +55,72 @@ export type SuiteResponse = {
   residual_gap_note?: string
 }
 
+export type AdaptiveAttempt = AttackResult & {
+  attempt_id: string
+  candidate_id: string
+  coverage_complete: boolean
+  controls_triggered: string[]
+  observations: string[]
+  tools_called: { name: string; arguments: Record<string, unknown> }[]
+  intercepted_tool_calls: { name: string; arguments: Record<string, unknown> }[]
+}
+
+export type AdaptiveRound = {
+  round: number
+  candidate_id: string
+  parent_candidate_id: string | null
+  category: string
+  strategy: string
+  prompt: string
+  document_payload: string | null
+  payload_sha256: string | null
+  generation: {
+    source: 'model' | 'policy' | 'policy_fallback'
+    rationale: string
+    fallback_reason: string | null
+    feedback_basis: unknown
+  }
+  attempts: { normal?: AdaptiveAttempt; defended?: AdaptiveAttempt }
+}
+
+type AdaptiveSummary = {
+  total_attacks: number
+  valid_evaluated_attacks: number
+  succeeded: number
+  partial: number
+  blocked: number
+  not_exercised: number
+  error: number
+  attack_success_rate_percent: number | null
+  residual_risk_score_percent: number | null
+}
+
+export type AdaptiveReport = {
+  schema_version: string
+  suite_kind: 'adaptive'
+  campaign_id: string
+  created_at: string
+  status: 'completed' | 'incomplete'
+  stop_reason: string
+  rounds: AdaptiveRound[]
+  normal: AdaptiveSummary
+  defended: AdaptiveSummary
+  comparison: {
+    paired_valid_rounds: number
+    normal_success_rate_percent: number | null
+    defended_success_rate_percent: number | null
+    success_rate_drop_percentage_points: number | null
+  }
+  config: Record<string, unknown>
+  model: Record<string, unknown>
+  generator_model: Record<string, unknown>
+  isolation: Record<string, unknown>
+  scoring: Record<string, unknown>
+  artifacts?: Record<string, unknown>
+  artifact_error?: string
+  residual_gap_note: string
+}
+
 const apiRoot = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '')
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -87,5 +153,10 @@ export const api = {
     request<SuiteResponse>('/security/attack-suite', {
       method: 'POST',
       body: JSON.stringify({ max_tool_calls: maxToolCalls }),
+    }),
+  adaptiveSuite: (rounds: number, generator: 'model' | 'policy', maxToolCalls: number) =>
+    request<AdaptiveReport>('/security/adaptive-suite', {
+      method: 'POST',
+      body: JSON.stringify({ rounds, generator, max_tool_calls: maxToolCalls, attempt_timeout_seconds: 60 }),
     }),
 }

@@ -32,16 +32,16 @@ services:
   postgres:
     image: postgres:15
     environment:
-      POSTGRES_DB: agentshield
-      POSTGRES_USER: agentshield
-      POSTGRES_PASSWORD: agentshield
+      POSTGRES_DB: ${POSTGRES_DB:-techpulse}
+      POSTGRES_USER: ${POSTGRES_USER:-techpulse}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-techpulse}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./agent_layer/db/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U agentshield -d agentshield"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -92,10 +92,13 @@ services:
       - ${SECRETS_DIR:?Set SECRETS_DIR to your external secrets folder}/agent_layer.env
       - ${SECRETS_DIR:?Set SECRETS_DIR to your external secrets folder}/mcp_layer.env
     environment:
-      POSTGRES_URL: postgresql://agentshield:agentshield@postgres:5432/agentshield
+      POSTGRES_URL: postgresql://${POSTGRES_USER:-techpulse}:${POSTGRES_PASSWORD:-techpulse}@postgres:5432/${POSTGRES_DB:-techpulse}
       QDRANT_URL: http://qdrant:6333
       FAQ_MCP_URL: http://faq-mcp:8001/mcp
       OLLAMA_BASE_URL: http://ollama:11434
+      SECURITY_RESULTS_DIR: /app/results/security_runs
+    volumes:
+      - security_results:/app/results/security_runs
     command: uvicorn agent_layer.main:app --host 0.0.0.0 --port 8000
     ports:
       - "8000:8000"
@@ -126,6 +129,7 @@ services:
       PYTHONPATH: /app
       FASTAPI_CHAT_URL: http://app:8000/chat
       FASTAPI_SECURITY_SUITE_URL: http://app:8000/security/attack-suite
+      FASTAPI_ADAPTIVE_SUITE_URL: http://app:8000/security/adaptive-suite
     command: chainlit run frontend_layer/app/chainlit_app.py --host 0.0.0.0 --port 8002
     ports:
       - "8002:8002"
@@ -137,3 +141,4 @@ volumes:
   ollama_data:
   postgres_data:
   qdrant_data:
+  security_results:

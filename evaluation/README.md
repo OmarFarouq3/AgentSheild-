@@ -6,6 +6,11 @@
 > Run `python -m evaluation.comparison` after defended evaluation; see the root
 > README and FINAL_REPORT.md for the current dashboard and before/after results.
 
+For the new feedback-driven paired agent, see
+[Adaptive red team demonstration](ADAPTIVE_RED_TEAM.md). It runs through
+`python -m evaluation.adaptive_runner`, the API, or Chainlit, and retains separate
+versioned evidence. The catalog CLI documented below remains unchanged.
+
 Run from `AgentSheild-`, with the target dependencies installed and the configured
 Qwen model served by local Ollama. No FastAPI, frontend, GitHub, or database service
 is required for this suite.
