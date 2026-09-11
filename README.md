@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-# AgentShield-
-
-=======
->>>>>>> e487921 (Complete AgentShield defenses dashboard and final evaluation)
 # AgentShield
 
 **Measure the attack. Prove the defense.**

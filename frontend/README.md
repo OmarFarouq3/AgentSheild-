@@ -1,28 +1,3 @@
-<<<<<<< HEAD
-# AgentShield Console
-
-React dashboard for the AgentShield FastAPI service.
-
-## Run locally
-
-Start the backend first on port `8000`, then:
-
-```bash
-npm install
-npm run dev
-```
-
-Open `http://localhost:5173`.
-
-The Vite development server proxies `/api` requests to `http://localhost:8000`. To point at another backend in a deployed build, set `VITE_API_URL` to the API base URL, for example `http://localhost:8000`.
-
-## Connected API routes
-
-- `GET /health` for dependency status
-- `GET /security/attack-cases` for the attack catalog
-- `POST /security/attack-suite` for before/after defense evaluation
-- `POST /chat` for the agent conversation
-=======
 # Evidence dashboard
 
 Run `python -m frontend.server` from the repository root, then visit
@@ -68,4 +43,16 @@ python -m frontend.test_browser --live
 The browser test uses installed Microsoft Edge in headless mode, checks responsive
 layout and interaction, and saves screenshots under `results/dashboard_*.png`.
 Omit `--live` for browser-only checks without calling Ollama.
->>>>>>> e487921 (Complete AgentShield defenses dashboard and final evaluation)
+
+## Legacy React console
+
+The repository also retains an older Vite/React console definition in
+`package.json` and `src/`. It connects to the existing backend routes:
+
+- `GET /health`
+- `GET /security/attack-cases`
+- `POST /security/attack-suite`
+- `POST /chat`
+
+The current hackathon evidence dashboard described above is the supported local
+demo surface and does not require the Node toolchain.

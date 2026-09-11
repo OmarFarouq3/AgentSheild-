@@ -182,12 +182,13 @@ def redact_sensitive_output(answer: str) -> tuple[str, GuardDecision]:
     """Prevent known simulated secrets from leaving either runtime posture."""
 
     redacted = answer
-    # Decode bounded base64/URL encodings once; redact the whole encoded token.
-    for token in re.findall(r"[A-Za-z0-9+/_-]{16,}={0,2}|(?:%[0-9A-Fa-f]{2})+", answer):
-        if contains_protected_data(token):
-            redacted = redacted.replace(token, "[REDACTED]")
-    if contains_protected_data(unquote(redacted)) and "%" in redacted:
-        redacted = "[REDACTED protected content]"
+    if active_security_mode() == "defended":
+        # Defended mode also detects bounded encoded and URL-encoded markers.
+        for token in re.findall(r"[A-Za-z0-9+/_-]{16,}={0,2}|(?:%[0-9A-Fa-f]{2})+", answer):
+            if contains_protected_data(token):
+                redacted = redacted.replace(token, "[REDACTED]")
+        if contains_protected_data(unquote(redacted)) and "%" in redacted:
+            redacted = "[REDACTED protected content]"
     for marker in (SYSTEM_PROMPT_CANARY, CONFIDENTIAL_CANARY):
         # Match case variants and separators inserted to evade a literal replace.
         marker_characters = [character for character in marker.casefold() if character.isalnum()]
