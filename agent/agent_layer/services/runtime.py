@@ -25,6 +25,7 @@ from agent_layer.services.tracking import AgentRunTracker
 from agent_layer.utils.message_utils import extract_final_answer, extract_tool_calls, parse_tool_call
 from agent_layer.utils.prompts import system_instructions_for_mode
 from agent_layer.utils.tool_schemas import AgentResult
+from mcp_layer.services.retrieval_tool import RETRIEVAL_TOOL_NAME
 
 logger = get_logger(__name__)
 session_histories: dict[str, list[dict[str, str]]] = {}
@@ -86,6 +87,30 @@ def build_model_input(query: str, history: list[dict[str, str]]) -> list[Any]:
     )
     input_messages.append({"role": "user", "content": query})
     return input_messages
+
+
+def should_search_faq(query: str) -> bool:
+    """Detect questions that are specifically about the bundled AgentShield FAQ domain.
+
+    Small local models can answer these from the wording alone instead of selecting
+    the retrieval tool.  Preflighting only distinctive product/architecture terms
+    keeps ordinary greetings, live GitHub requests, and unrelated questions unchanged.
+    """
+
+    normalized = " ".join(query.casefold().split())
+    # Adaptive prompts often mention the product while carrying an attack
+    # instruction; those must continue through the red-team path unchanged.
+    if any(signal in normalized for signal in (
+        "ignore ", "reveal ", "system prompt", "confidential", "canary", "bypass ",
+        "read_confidential", "read_partner_brief", "override ",
+    )):
+        return False
+    faq_signals = (
+        "agentshield", "faq", "qdrant", "fastapi endpoint", "health endpoint",
+        "postgres query", "repository tables", "structured repository", "docker compose",
+        "containerized", "logging requirements", "logging requirement",
+    )
+    return any(signal in normalized for signal in faq_signals)
 
 
 async def call_model(input_messages: list[Any], force_final_answer: bool = False) -> dict[str, Any]:
@@ -172,8 +197,47 @@ async def _run_tool_loop(query: str, session_id: str | None, max_tool_calls: int
 
     input_messages = build_model_input(query, history)
     response = None
+    preflighted_faq = False
 
-    while tracker.total_tool_calls < max_tool_calls:
+    # The FAQ is a first-party knowledge source, so make its use deterministic for
+    # clearly AgentShield-specific questions. This prevents a small local model from
+    # confidently answering from its prior knowledge without consulting the FAQ.
+    if should_search_faq(query) and max_tool_calls > 0:
+        faq_tool_call = {
+            "function": {
+                "name": RETRIEVAL_TOOL_NAME,
+                "arguments": {"query": query, "top_k": 3},
+            }
+        }
+        tracker.record_tool_call(RETRIEVAL_TOOL_NAME)
+        transcript.append({
+            "event": "tool_selected",
+            "tool_name": RETRIEVAL_TOOL_NAME,
+            "arguments": {"query": query, "top_k": 3},
+            "selection": "faq_intent_preflight",
+        })
+        try:
+            faq_result = await dispatcher.execute_tool(RETRIEVAL_TOOL_NAME, {"query": query, "top_k": 3})
+            faq_result, retrieval_decision = guard_retrieved_result(faq_result)
+            if retrieval_decision.blocked:
+                transcript.append({"event": "guard_blocked", "control": retrieval_decision.control,
+                                   "reason": retrieval_decision.reason, "tool_name": RETRIEVAL_TOOL_NAME})
+            tracker.record_tool_result(RETRIEVAL_TOOL_NAME, faq_result)
+            faq_output = {"ok": True, "result": faq_result}
+        except Exception as exc:
+            logger.error("FAQ preflight failed", extra={"error_type": type(exc).__name__, "error_message": str(exc)})
+            faq_output = {"ok": False, "error_type": type(exc).__name__, "error_message": str(exc)}
+        transcript.append({"event": "tool_result", "tool_name": RETRIEVAL_TOOL_NAME, "output": faq_output})
+        input_messages.extend([
+            {"role": "assistant", "content": "", "tool_calls": [faq_tool_call]},
+            {"role": "tool", "tool_name": RETRIEVAL_TOOL_NAME,
+             "content": json.dumps(faq_output, ensure_ascii=False, default=str)},
+        ])
+        if tracker.total_tool_calls >= max_tool_calls:
+            response = await call_model(input_messages, force_final_answer=True)
+            preflighted_faq = True
+
+    while tracker.total_tool_calls < max_tool_calls and not (preflighted_faq and response is not None):
         response = await call_model(input_messages)
         tool_calls = extract_tool_calls(response)
         transcript.append(
@@ -278,7 +342,7 @@ async def _run_tool_loop(query: str, session_id: str | None, max_tool_calls: int
     if response is None:
         raise RuntimeError("Agent did not produce a response.")
 
-    if tracker.total_tool_calls >= max_tool_calls:
+    if tracker.total_tool_calls >= max_tool_calls and not preflighted_faq:
         input_messages.append(
             {
                 "role": "user",
