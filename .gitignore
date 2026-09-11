@@ -150,6 +150,8 @@ activemq-data/
 # Environments
 .env
 .envrc
+.secrets/
+agent/secrets/
 .venv
 env/
 venv/
@@ -203,6 +205,9 @@ cython_debug/
 # Temporary file for partial code execution
 tempCodeRunnerFile.py
 
+# Generated security-suite evidence; retain locally for dashboarding, never commit.
+results/security_runs/
+
 # Ruff stuff:
 .ruff_cache/
 
@@ -216,3 +221,11 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# React/Vite frontend generated files
+frontend/node_modules/
+/.chainlit/
+frontend/dist/
+frontend/*.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts

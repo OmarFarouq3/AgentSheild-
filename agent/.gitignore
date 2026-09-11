@@ -1,0 +1,17 @@
+.env
+*.env
+secrets/
+!.env.example
+!**/.env.example
+logs/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.chainlit/
+.files/
+.venv/
+venv/
+dist/
+build/

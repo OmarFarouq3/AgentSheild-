@@ -1,0 +1,11 @@
+{
+  "files": {
+    "baseline_DIR-001_results.json": "4e842016037140553e978f5d73c036e57221d7791b22dc9d1dd7b9d93afddc7e",
+    "baseline_DIR-001_summary.json": "9c43361a96775c7c22e5ee2dc77bda42896311230ffc409b6df56c11650bc6b2",
+    "baseline_results.json": "657c531107f010a6bef6d03a89ff594c10109f97bc02dc37c80f5067428a4fdb",
+    "baseline_smoke_results.json": "118e7d432238dbc5d2a531dedf4a88430da986294fa7e3f3356f6a818f656503",
+    "baseline_smoke_summary.json": "af5dd72233889ca97918969d54e54cb896f64e32ffed786eeb29eba7db4c4192",
+    "baseline_summary.json": "e950acc18370befd064ceeec8622d484449a49744b7ee2a616a3305f821732fa"
+  },
+  "note": "Frozen historical artifacts: SHA-256 captured before final integration, verified unchanged afterwards. Not a digital signature."
+}
