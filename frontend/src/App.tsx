@@ -24,10 +24,11 @@ import {
 } from 'lucide-react'
 import { api, type AttackCase, type ChatResponse, type Health, type SuiteReport, type SuiteResponse } from './api'
 import AdaptiveView from './AdaptiveView'
+import DefenseGuide from './DefenseGuide'
 
 type Message = { role: 'user' | 'assistant'; text: string; meta?: ChatResponse }
-type View = 'preset' | 'chat' | 'adaptive'
-const viewFromPath = (): View => window.location.pathname === '/adaptive' ? 'adaptive' : window.location.pathname === '/chat' ? 'chat' : 'preset'
+type View = 'preset' | 'chat' | 'adaptive' | 'defenses'
+const viewFromPath = (): View => window.location.pathname === '/defenses' ? 'defenses' : window.location.pathname === '/adaptive' ? 'adaptive' : window.location.pathname === '/chat' ? 'chat' : 'preset'
 
 const sessionId = crypto.randomUUID()
 
@@ -111,7 +112,10 @@ function App() {
           </nav>
           <p className="sidebar-explainer">Two ways to test the same defensive harness: fixed attack cases or a feedback-driven attacker.</p>
           <div className="sidebar-heading">Explore</div>
-          <nav aria-label="Utilities"><NavButton icon={<Bot size={17} />} label="Agent chat" active={view === 'chat'} onClick={() => navigate('chat')} /></nav>
+          <nav aria-label="Utilities">
+            <NavButton icon={<Shield size={17} />} label="How defenses work" active={view === 'defenses'} onClick={() => navigate('defenses')} />
+            <NavButton icon={<Bot size={17} />} label="Agent chat" active={view === 'chat'} onClick={() => navigate('chat')} />
+          </nav>
           <div className="sidebar-bottom">
             <div className="environment-label">Environment</div>
             <div className="environment"><span className="status-dot" /> Local development <span className="environment-caret">⌄</span></div>
@@ -127,6 +131,7 @@ function App() {
             <PresetEvaluation health={health} cases={cases} suite={suite} loading={loading} suiteLoading={suiteLoading} adaptiveBusy={adaptiveLoading} maxToolCalls={maxToolCalls} setMaxToolCalls={setMaxToolCalls} runSuite={runSuite} />
           </section>
           {view === 'chat' && <ChatView />}
+          {view === 'defenses' && <DefenseGuide navigate={navigate} />}
           <AdaptiveView active={view === 'adaptive'} suiteBusy={suiteLoading} onBusyChange={setAdaptiveLoading} />
         </main>
       </div>

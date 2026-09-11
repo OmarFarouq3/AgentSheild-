@@ -59,7 +59,9 @@ primary testing pages keep controls, results, and explanations together:
   between pages in the current session; reloads clear it from the UI.
 
 Only one test method can run at a time in the console. Their scoring and reports
-remain separate. **Agent chat** is available as a secondary utility. The static
+remain separate. **How defenses work** (`/defenses`) explains the implemented
+controls, request flow, posture differences, evidence, and limitations, with
+repository references for reviewers. **Agent chat** is a secondary utility. The static
 artifact dashboard on port 8787 described above is a separate review tool.
 
 With the backend running on port 8000, use a second PowerShell terminal:

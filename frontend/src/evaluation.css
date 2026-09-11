@@ -1,3 +1,20 @@
+.defense-guide { display: grid; gap: 26px; min-width: 0; }
+.defense-guide .page-heading { margin: 0; }
+.defense-guide h2 { font-size: 20px; margin: 0 0 16px; }
+.defense-guide h3 { font-size: 16px; margin: 0 0 12px; }
+.defense-guide p { color: var(--muted); font-size: 13px; line-height: 1.8; }
+.defense-guide .guide-note { border-left: 2px solid var(--teal); padding-left: 14px; }
+.defense-control-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.defense-guide summary { cursor: pointer; font-size: 12px; color: var(--teal); }
+.defense-guide code { display: inline-block; overflow-wrap: anywhere; max-width: 100%; color: var(--teal); font-size: 11px; margin-top: 12px; }
+.defense-flow { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.defense-flow li { padding: 14px; border: 1px solid var(--line); border-radius: 6px; font-size: 12px; line-height: 1.7; }
+.defense-flow span { display: block; color: var(--lime); margin-bottom: 8px; font-family: monospace; }
+.guide-table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; }
+.guide-table th, .guide-table td { padding: 14px 10px; border-bottom: 1px solid var(--line); line-height: 1.7; }
+.guide-table td { color: var(--muted); }
+.guide-sources { padding-left: 18px; color: var(--muted); font-size: 12px; line-height: 1.8; }
+@media (max-width: 750px) { .defense-control-grid, .defense-flow { grid-template-columns: 1fr; } .defense-guide > * { min-width: 0; } .guide-table { min-width: 520px; } }
 .app-shell { color-scheme: dark; }
 @media (forced-colors: none) {
   :root { color-scheme: dark; scrollbar-color: #46656b #0b1b22; }
