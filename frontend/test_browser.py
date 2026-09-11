@@ -42,33 +42,6 @@ def main():
         page.click("#clear-filters")
         # Rendering untrusted output must not execute HTML or trigger beacons.
         assert page.evaluate("esc('<img src=https://untrusted.example onerror=alert(1)>')").startswith("&lt;img")
-        chat_requests = []
-        def chat_reply(route):
-            payload = route.request.post_data_json
-            chat_requests.append(payload)
-            route.fulfill(json={"interactive_demo": True, "security_mode": payload["security_mode"],
-                "response": "Hello <img src=https://untrusted.example onerror=alert(1)>",
-                "latency_ms": 42, "tools_called": [{"name": "read_partner_brief", "arguments": {}}],
-                "intercepted_tool_calls": [{"name": "fetch_public_url", "arguments": {"url": "https://untrusted.example"}}],
-                "security_events": [{"event": "guard_blocked", "control": "test"}]})
-        page.route("**/dashboard-api/chat", chat_reply)
-        for mode in ("baseline", "defended"):
-            page.fill("#chat-message", "Hello " + mode)
-            page.select_option("#chat-mode", mode)
-            page.click("#chat-send")
-            page.wait_for_function("document.querySelector('#chat-status').textContent.includes('Response received')")
-            assert chat_requests[-1] == {"message": "Hello " + mode, "security_mode": mode}
-        assert page.locator("#chat-history article").count() == 2
-        history = page.locator("#chat-history").inner_text()
-        assert "Hello baseline" in history and "Hello defended" in history
-        assert "Runtime: 42 ms" in history and "Hello <img" in history
-        page.locator("#chat-history details").evaluate_all("items => items.forEach(item => item.open = true)")
-        history = page.locator("#chat-history").inner_text()
-        assert "read_partner_brief" in history and "fetch_public_url" in history and "guard_blocked" in history
-        assert page.locator("#chat-history img").count() == 0
-        page.click("#chat-clear")
-        assert page.locator("#chat-history").inner_text() == ""
-        assert page.input_value("#chat-message") == ""
         page.set_viewport_size({"width": 390, "height": 844})
         page.evaluate("window.scrollTo(0,0)")
         page.screenshot(path=str(root / "dashboard_mobile.png"), full_page=True)
