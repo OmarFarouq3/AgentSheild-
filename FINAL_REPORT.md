@@ -2,6 +2,11 @@
 
 **Status: demo ready for the local, synthetic evaluation described here.**
 
+> Historical-evidence note: this report records the frozen original 20-case
+> evaluation. The active catalog now includes five additive controlled
+> cybersecurity-hallucination cases (HAL-001 through HAL-005), which require a
+> fresh paired v2 run before they can be included in any measured total.
+
 Verified on 2026-09-09 on branch `feature/evaluation`. No commit or push was
 performed. The working tree was clean before implementation. The six captured
 baseline artifacts remain byte-for-byte unchanged; their SHA-256 values are in

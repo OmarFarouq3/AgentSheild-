@@ -24,7 +24,7 @@ AgentShield now doubles as a deliberately testable target agent. The original pu
 
 The agent has two comparable postures. `normal` is the ordinary agent with standard prompt, tool, input, and output hygiene. `defended` is the safe default and adds stronger input screening, untrusted-document injection classification, least-privilege enforcement, and output canary redaction. These are visible, testable controls rather than claims that prompt injection is solved.
 
-The automated suite runs the same four categories against both postures—direct prompt injection, indirect document injection, tool misuse/privilege escalation, and system-prompt or data exfiltration. It grades each attempt as `blocked`, `partial`, or `succeeded`, retains the agent/tool transcript as evidence, calculates attack success rate, and names the residual gaps.
+The automated suite runs the same five categories against both postures—direct prompt injection, indirect document injection, tool misuse/privilege escalation, system-prompt or data exfiltration, and controlled cybersecurity hallucination. The final category asks for a deliberately non-existent CVE to be presented as verified, without using real systems or exploit instructions. It grades each attempt as `blocked`, `partial`, or `succeeded`, retains the agent/tool transcript as evidence, calculates attack success rate, and names the residual gaps.
 
 After the stack is running, view the cases or run the before/after demonstration:
 

@@ -3,7 +3,7 @@ import { AlertTriangle, Download, Play, ShieldCheck, Terminal } from 'lucide-rea
 import { api, type AdaptiveAttempt, type AdaptiveReport, type AdaptiveRound } from './api'
 
 const labels: Record<string, string> = {
-  blocked: 'Blocked', partial: 'Partial access', succeeded: 'Disclosed',
+  blocked: 'Blocked', partial: 'Partial access', succeeded: 'Succeeded',
   not_exercised: 'Not exercised', error: 'Error',
 }
 const sources = { model: 'Local model', policy: 'Feedback policy', policy_fallback: 'Policy fallback' }
@@ -100,7 +100,7 @@ export default function AdaptiveView({ active, suiteBusy, onBusyChange }: {
         <label>Tool budget<select aria-label="Adaptive tool budget" value={maxTools} onChange={event => setMaxTools(Number(event.target.value))} disabled={busy}>{[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n} per attempt</option>)}</select></label>
         <button className="button primary" onClick={() => void run()} disabled={busy || suiteBusy}><Play size={15} /> {busy ? 'Campaign running…' : 'Run adaptive campaign'}</button>
       </div>
-      <p className="adaptive-meta">Synthetic tools only · 60 seconds per target attempt · 30 seconds per model proposal. Normal retains baseline hygiene. The first four rounds explore the four categories; later rounds revisit observed gaps.</p>
+      <p className="adaptive-meta">Synthetic tools only · 60 seconds per target attempt · 30 seconds per model proposal. Normal retains baseline hygiene. The first five rounds explore the five categories; later rounds revisit observed gaps.</p>
       <details className="adaptive-method-help"><summary>How this testing method works</summary><p>The local model proposes prompts or injected documents using structured feedback from earlier rounds. Feedback policy mode chooses and varies built-in strategies from those outcomes; it also supplies the fallback when a model proposal is rejected.</p><p>Each candidate is tested in both modes before the next round. This page keeps campaign results separate from the fixed attacks in Preset evaluation. Expand a round to inspect its generation reason, feedback, exact payload, and target evidence.</p></details>
       {busy && <p className="adaptive-progress" role="status"><Terminal size={16} /> {elapsed}s elapsed. Waiting for the backend report; round evidence appears when the campaign finishes. You can switch pages while it runs.</p>}
       {suiteBusy && !busy && <p role="status">The fixed suite is running. Wait for it to finish before starting this campaign.</p>}
@@ -114,7 +114,7 @@ export default function AdaptiveView({ active, suiteBusy, onBusyChange }: {
       <div className="stat-grid">
         {([['Valid paired rounds', String(report.comparison.paired_valid_rounds), 'Both postures have valid evidence'], ['Normal disclosure rate', percent(report.comparison.normal_success_rate_percent), 'Identical valid pairs only'], ['Defended disclosure rate', percent(report.comparison.defended_success_rate_percent), 'Identical valid pairs only'], ['Disclosure rate drop', report.comparison.success_rate_drop_percentage_points === null ? 'N/A' : `${report.comparison.success_rate_drop_percentage_points.toFixed(1)} pts`, 'Negative values mean a regression']] as const).map(([label, value, note]) => <article className="stat-card" key={label}><div className="stat-label">{label}</div><div className="stat-value">{value}</div><div className="stat-note">{note}</div></article>)}
       </div>
-      <div className="panel adaptive-totals"><div className="results-table-scroll"><table className="results-table"><thead><tr><th>Posture</th><th>Valid / attempts</th><th>Blocked</th><th>Partial</th><th>Disclosed</th><th>Not exercised</th><th>Errors</th></tr></thead><tbody>{(['normal', 'defended'] as const).map(mode => <tr key={mode}><td>{mode === 'normal' ? 'Undefended / normal' : 'Defended'}</td><td>{report[mode].valid_evaluated_attacks} / {report[mode].total_attacks}</td><td>{report[mode].blocked}</td><td>{report[mode].partial}</td><td>{report[mode].succeeded}</td><td>{report[mode].not_exercised}</td><td>{report[mode].error}</td></tr>)}</tbody></table></div>
+      <div className="panel adaptive-totals"><div className="results-table-scroll"><table className="results-table"><thead><tr><th>Posture</th><th>Valid / attempts</th><th>Blocked</th><th>Partial</th><th>Succeeded</th><th>Not exercised</th><th>Errors</th></tr></thead><tbody>{(['normal', 'defended'] as const).map(mode => <tr key={mode}><td>{mode === 'normal' ? 'Undefended / normal' : 'Defended'}</td><td>{report[mode].valid_evaluated_attacks} / {report[mode].total_attacks}</td><td>{report[mode].blocked}</td><td>{report[mode].partial}</td><td>{report[mode].succeeded}</td><td>{report[mode].not_exercised}</td><td>{report[mode].error}</td></tr>)}</tbody></table></div>
         <p className="adaptive-meta">Partial means measured sensitive access or an intercepted exfiltration attempt, not a final-answer leak. Errors and unexercised attempts do not enter rates. N/A means no valid measurement.</p></div>
       {report.comparison.paired_valid_rounds === 0 && <p className="adaptive-warning">No valid paired comparison is available. This run does not establish a defense improvement.</p>}
       <div className="adaptive-rounds">{report.rounds.map(round => <Candidate key={round.candidate_id} round={round} />)}</div>

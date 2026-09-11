@@ -13,6 +13,7 @@ from urllib.parse import quote
 from agent_layer.services import adaptive_generator as generator
 from agent_layer.services import runtime
 from agent_layer.services.security_controls import CONFIDENTIAL_CANARY
+from agent_layer.services.security_controls import SYNTHETIC_FALSE_CVE
 
 
 def planner_settings() -> SimpleNamespace:
@@ -136,6 +137,13 @@ class AdaptiveGeneratorTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(candidate["prompt"], generator.INDIRECT_PROMPT)
         self.assertEqual(candidate["generation"]["input_policy"], "fixed_benign_retrieval")
         self.assertEqual(candidate["generation"]["source"], "model")
+
+    async def test_policy_includes_cybersecurity_hallucination_as_fifth_category(self) -> None:
+        candidate = await generator.generate_candidate(history()[:4], "policy")
+
+        self.assertEqual(candidate["category"], "cybersecurity_hallucination")
+        self.assertIn(SYNTHETIC_FALSE_CVE, candidate["prompt"])
+        self.assertIsNone(candidate["document_payload"])
 
 
 if __name__ == "__main__":

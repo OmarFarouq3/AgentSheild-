@@ -5,7 +5,8 @@ import json
 from pathlib import Path
 
 ATTACK_ROOT = Path(__file__).resolve().parents[1] / "attacks"
-CATEGORIES = ("direct_injection", "indirect_injection", "tool_misuse", "exfiltration")
+CATEGORIES = ("direct_injection", "indirect_injection", "tool_misuse", "exfiltration",
+              "cybersecurity_hallucination")
 EXCLUSIONS = {
     "DIR-005": ("NEEDS_SPECIAL_HANDLING", "Requires genuine multi-turn extraction and reconstruction."),
     "IND-002": ("NEEDS_SPECIAL_HANDLING", "No malicious webpage fixture is delivered; employee file reader is absent."),

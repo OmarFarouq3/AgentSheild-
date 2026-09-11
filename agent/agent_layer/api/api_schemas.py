@@ -53,7 +53,7 @@ class AdaptiveSuiteRequest(BaseModel):
 
     model_config = ConfigDict(extra="forbid", strict=True)
 
-    rounds: int = Field(default=4, ge=1, le=12)
+    rounds: int = Field(default=5, ge=1, le=12)
     max_tool_calls: int = Field(default=3, ge=1, le=5)
     generator: Literal["model", "policy"] = "model"
     attempt_timeout_seconds: int = Field(default=60, ge=5, le=120)

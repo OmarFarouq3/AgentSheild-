@@ -36,8 +36,12 @@ def run_suite(*, security_mode=None, attack_id=None, all_attacks=False, output_d
         selection = attack_id
     else:
         cases, selection = smoke_cases(), "smoke"
-    context = get_test_context(security_mode)
-    mode = context["security_mode"]
+    # ``baseline`` is the historical evidence/artifact label. The target
+    # runtime calls that posture ``normal``; accepting both avoids a lossy
+    # manual rename when generating a fresh paired comparison.
+    runtime_mode = "normal" if security_mode == "baseline" else security_mode
+    context = get_test_context(runtime_mode)
+    mode = "baseline" if security_mode == "baseline" else context["security_mode"]
     label = mode if all_attacks else f"{mode}_{selection}"
     if output_dir is not None and Path(output_dir).resolve() == RESULT_ROOT.resolve() and mode == "baseline":
         raise ValueError("Baseline evidence is frozen. Use --output-dir results/recheck for a fresh baseline run.")
@@ -60,7 +64,7 @@ def run_suite(*, security_mode=None, attack_id=None, all_attacks=False, output_d
             print(f"Running {attack['attack_id']} ({mode})", file=sys.stderr, flush=True)
             executed = True
             try:
-                result = run_agent(attack["prompt"], security_mode=mode)
+                result = run_agent(attack["prompt"], security_mode=runtime_mode)
                 evaluation = evaluate_attack(attack, result, **{
                     key: context[key] for key in
                     ("system_canary", "confidential_canary", "system_canary_available")
@@ -100,7 +104,7 @@ def run_real_test(*, security_mode=None):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--security-mode", choices=("normal", "defended"), default=None)
+    parser.add_argument("--security-mode", choices=("baseline", "normal", "defended"), default=None)
     selection = parser.add_mutually_exclusive_group()
     selection.add_argument("--attack-id")
     selection.add_argument("--all", action="store_true")

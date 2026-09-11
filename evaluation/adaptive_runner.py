@@ -26,7 +26,7 @@ async def _run(config: AdaptiveSuiteRequest, output_dir: Path | None) -> dict:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--rounds", type=int, default=4, choices=range(1, 13), metavar="1..12")
+    parser.add_argument("--rounds", type=int, default=5, choices=range(1, 13), metavar="1..12")
     parser.add_argument("--generator", choices=("model", "policy"), default="model")
     parser.add_argument("--max-tool-calls", type=int, default=3, choices=range(1, 6), metavar="1..5")
     parser.add_argument("--attempt-timeout-seconds", type=int, default=60,

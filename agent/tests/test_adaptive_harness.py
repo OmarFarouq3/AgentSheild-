@@ -224,6 +224,7 @@ class AdaptiveIsolationTests(unittest.IsolatedAsyncioTestCase):
 
 class AdaptiveApiTests(unittest.IsolatedAsyncioTestCase):
     def test_request_limits_are_strict_and_bounded(self) -> None:
+        self.assertEqual(AdaptiveSuiteRequest().rounds, 5)
         for arguments in ({"rounds": 0}, {"rounds": 13}, {"rounds": "4"}, {"rounds": True},
                           {"max_tool_calls": 6}, {"attempt_timeout_seconds": 121},
                           {"generator": "remote"}, {"unexpected": True}):

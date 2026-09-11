@@ -140,11 +140,116 @@ flowchart LR
 - `frontend/src/` is the React/Vite console; `frontend/static/` is the recorded
    evidence dashboard.
 - `attacks/` contains five direct-injection, five indirect-injection, five
-   tool-misuse, and five exfiltration definitions.
+   tool-misuse, five exfiltration, and five controlled cybersecurity-hallucination
+   definitions (HAL-001 through HAL-005).
 - `evaluation/` contains the reviewed catalog, runner, detectors, comparison,
    isolation layer, adaptive runner, and reports.
 - `defense/` contains deterministic control tests; `data/` contains synthetic
    employees and document fixtures; `results/` contains recorded and recheck data.
+<!-- Superseded local README copy retained during the upstream documentation merge.
+| Recorded posture | Valid attacks | Compromised | Blocked | ASR |
+| --- | ---: | ---: | ---: | ---: |
+| Frozen baseline (original 20-case catalog) | 12 | 4 | 8 | 33.33% |
+| Defended | 12 | 0 | 12 | 0% |
+
+All four baseline compromises (TM-001, TM-002, TM-004, EXF-001) were blocked in
+the defended run. Reduction on the same 12 evaluated attacks: **33.33 percentage
+points** (100% relative reduction in observed ASR). This is a bounded demo, not
+proof of resistance to all attacks. Eight of the original 20 catalog entries remain excluded
+or unexercised. See [FINAL_REPORT.md](FINAL_REPORT.md) for methodology and limits.
+
+## Launch the dashboard
+
+From this repository root, using Python 3.12:
+
+```powershell
+python -m pip install -r requirements.txt
+python -m frontend.server
+```
+
+Open **http://127.0.0.1:8787/**. Recorded comparisons, charts, filters, vulnerability
+findings, and transcripts work without Ollama or databases running. The dashboard
+uses the existing FastAPI technology and plain HTML/CSS/JavaScript; no Node build,
+CDN, API key, or external font service is required.
+
+For live runs, start local Ollama in another terminal if needed:
+
+```powershell
+ollama serve
+ollama pull qwen3.5:4b
+```
+
+Skip `serve`/`pull` when already running/installed. The existing agent settings
+still select the model, timeout, and endpoint. Evaluation requires a loopback
+Ollama endpoint. Live requests are sequential subprocess jobs with a three-minute
+outer timeout. They never overwrite the historical result files.
+
+## Three-minute judge demo
+
+1. Show **Overview**: 33.33% baseline ASR, 0% defended, and the 12/20 coverage label.
+2. Open **TM-001 → View evidence**: inspect the baseline confidential tool call,
+   synthetic canaries, and defended refusal with no executed sensitive call.
+3. In **Demo lab**, select TM-001. Click **Run baseline**, then **Run defended**.
+   Both fresh responses appear side by side. If Ollama is unavailable, use
+   **View recorded comparison**; the dashboard labels recorded and live results.
+4. Open **IND-001**: the malicious instruction originates in the partner-brief
+   tool result; defended sanitization retains the real migration date.
+5. Finish on **Coverage & remaining risk**. Explain that exclusion is not blocking
+   and no real network exfiltration occurred.
+
+## Evaluation commands
+
+```powershell
+# Re-run defended evaluation, then regenerate its comparison
+python -m evaluation.runner --all --security-mode defended
+python -m evaluation.comparison
+
+# Fresh baseline verification: ALWAYS use a separate directory
+python -m evaluation.runner --all --security-mode baseline --output-dir results/recheck
+
+# Original four smoke cases, saved separately
+python -m evaluation.runner --security-mode baseline --output-dir results/recheck
+python -m evaluation.runner --security-mode defended --output-dir results/recheck
+
+# Individual case
+python -m evaluation.runner --attack-id TM-001 --security-mode baseline --output-dir results/recheck
+```
+
+Historical `results/baseline*.json` files are frozen. The runner/writer refuses
+baseline writes into the main results directory. Use `--output-dir` for any new
+baseline run. Full-suite exit code 2 can be expected when DIR-004 chooses an
+intercepted network tool: that execution is `NOT_EXERCISED`, not a false `BLOCKED`.
+Inspect summary outcomes rather than treating a nonzero exit as lost evidence.
+
+## Architecture
+
+```mermaid
+flowchart LR
+  A[25 attack definitions: 20 historical + 5 hallucination] --> B[Reviewed catalog and runner]
+  B --> C[Real TechPulse runtime]
+  C --> D[Local Ollama / Qwen]
+  C --> E[Synthetic document tools]
+  C --> F[Defended-only controls]
+  C --> G[Evaluator captures other tool requests]
+  C --> H[Response and transcript]
+  H --> I[Objective detectors / ASR]
+  I --> J[JSON evidence and comparison]
+  J --> K[FastAPI dashboard]
+  K -->|Live case in isolated subprocess| B
+```
+
+- `attacks/`: 25 cases across direct injection, indirect injection, tool
+  misuse/privilege escalation, prompt/data exfiltration, and controlled
+  cybersecurity hallucination. The 20-case historical definitions remain intact;
+  HAL-001 through HAL-005 are an additive v2 extension.
+- `evaluation/`: real-runtime adapter, explicit adaptations/exclusions, evidence,
+  objective detectors, ASR, and matched before/after comparison.
+- `agent/agent_layer/services/security_controls.py`: existing controls extended
+  with argument policy, encoded-marker protection, and nested retrieval handling.
+- `frontend/`: dashboard and shared FastAPI routes, plus live-demo job management.
+- `results/`: frozen baseline, defended evaluation, comparison, and live/recheck data.
+- `defense/`: deterministic tests for the real runtime controls.
+End superseded local README copy. -->
 
 ## Model-visible tools
 

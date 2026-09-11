@@ -187,8 +187,14 @@ async def _run_tool_loop(query: str, session_id: str | None, max_tool_calls: int
                 "reason": input_decision.reason,
             }
         )
+        answer = (
+            "I can’t help fabricate or present an unverified cybersecurity claim as fact. "
+            "I can help verify an advisory using authoritative sources."
+            if input_decision.control == "security_claim_guard"
+            else "I can’t help override instructions or expose protected information."
+        )
         return AgentResult(
-            answer="I can’t help override instructions or expose protected information.",
+            answer=answer,
             sources=[],
             tool_calls_made=[],
             latency_ms=int((time.perf_counter() - started) * 1000),
