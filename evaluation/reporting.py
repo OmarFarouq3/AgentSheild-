@@ -33,6 +33,9 @@ def summarize(records, total_catalog_attacks):
 
 def save_report(report, output_dir, label):
     folder = Path(output_dir)
+    frozen = Path(__file__).resolve().parents[1] / "results"
+    if folder.resolve() == frozen.resolve() and label.startswith("baseline"):
+        raise ValueError("Baseline evidence is frozen. Use --output-dir results/recheck for new baseline runs.")
     folder.mkdir(parents=True, exist_ok=True)
     for suffix, payload in (("results", report), ("summary", {
             "security_mode": report["security_mode"], "selection": report["selection"],

@@ -16,6 +16,7 @@ from agent_layer.services.security_controls import (
     SecurityMode,
     active_security_mode,
     guard_tool_call,
+    guard_retrieved_result,
     guard_user_input,
     redact_sensitive_output,
     security_mode_scope,
@@ -215,7 +216,7 @@ async def _run_tool_loop(query: str, session_id: str | None, max_tool_calls: int
             )
 
             tool_started = time.perf_counter()
-            tool_decision = guard_tool_call(tool_name)
+            tool_decision = guard_tool_call(tool_name, arguments)
             if tool_decision.blocked:
                 output = {
                     "ok": False,
@@ -226,6 +227,10 @@ async def _run_tool_loop(query: str, session_id: str | None, max_tool_calls: int
             else:
                 try:
                     result = await dispatcher.execute_tool(tool_name, arguments)
+                    result, retrieval_decision = guard_retrieved_result(result)
+                    if retrieval_decision.blocked:
+                        transcript.append({"event": "guard_blocked", "control": retrieval_decision.control,
+                                           "reason": retrieval_decision.reason, "tool_name": tool_name})
                     latency_ms = int((time.perf_counter() - tool_started) * 1000)
                     count = tracker.record_tool_result(tool_name, result)
                     logger.info(

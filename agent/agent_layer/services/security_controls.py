@@ -10,6 +10,11 @@ from __future__ import annotations
 
 import re
 import unicodedata
+import base64
+import binascii
+import json
+from urllib.parse import unquote, urlparse
+from ipaddress import ip_address
 from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass
@@ -103,7 +108,7 @@ def guard_user_input(query: str) -> GuardDecision:
     return GuardDecision(blocked=False)
 
 
-def guard_tool_call(tool_name: str) -> GuardDecision:
+def guard_tool_call(tool_name: str, arguments: dict | None = None) -> GuardDecision:
     """Enforce least privilege immediately before any tool is executed."""
 
     if active_security_mode() == "defended" and tool_name == SENSITIVE_TOOL_NAME:
@@ -112,13 +117,26 @@ def guard_tool_call(tool_name: str) -> GuardDecision:
             control="tool_allowlist",
             reason="The confidential-document tool is not available to the defended agent.",
         )
+    if active_security_mode() == "defended" and arguments is not None:
+        if contains_protected_data(json.dumps(arguments, ensure_ascii=False)):
+            return GuardDecision(True, "tool_argument_guard", "Protected data cannot enter tool arguments.")
+        if tool_name in {"fetch_mcp_tool", "fetch_public_url"}:
+            parsed = urlparse(str(arguments.get("url", "")))
+            host = (parsed.hostname or "").lower()
+            private = host in {"localhost", "localhost.localdomain"} or host.endswith(".local")
+            try:
+                private = private or not ip_address(host).is_global
+            except ValueError:
+                pass
+            if parsed.scheme not in {"http", "https"} or not host or parsed.username or private:
+                return GuardDecision(True, "tool_argument_guard", "Fetch requires a public HTTP(S) URL without credentials.")
     return GuardDecision(blocked=False)
 
 
-def assert_tool_allowed(tool_name: str) -> None:
+def assert_tool_allowed(tool_name: str, arguments: dict | None = None) -> None:
     """Defence in depth for callers that bypass the agent runtime."""
 
-    decision = guard_tool_call(tool_name)
+    decision = guard_tool_call(tool_name, arguments)
     if decision.blocked:
         raise SecurityPolicyViolation(decision.reason or "Tool call denied by security policy.")
 
@@ -164,6 +182,12 @@ def redact_sensitive_output(answer: str) -> tuple[str, GuardDecision]:
     """Prevent known simulated secrets from leaving either runtime posture."""
 
     redacted = answer
+    # Decode bounded base64/URL encodings once; redact the whole encoded token.
+    for token in re.findall(r"[A-Za-z0-9+/_-]{16,}={0,2}|(?:%[0-9A-Fa-f]{2})+", answer):
+        if contains_protected_data(token):
+            redacted = redacted.replace(token, "[REDACTED]")
+    if contains_protected_data(unquote(redacted)) and "%" in redacted:
+        redacted = "[REDACTED protected content]"
     for marker in (SYSTEM_PROMPT_CANARY, CONFIDENTIAL_CANARY):
         # Match case variants and separators inserted to evade a literal replace.
         marker_characters = [character for character in marker.casefold() if character.isalnum()]
@@ -183,3 +207,51 @@ def redact_sensitive_output(answer: str) -> tuple[str, GuardDecision]:
             ),
         )
     return answer, GuardDecision(blocked=False)
+
+
+def contains_protected_data(text: str) -> bool:
+    """Detect only known synthetic markers, including one deterministic encoding."""
+    decoded = unquote(unicodedata.normalize("NFKC", text))
+    candidates = [decoded]
+    for token in re.findall(r"[A-Za-z0-9+/_-]{16,}={0,2}", decoded):
+        if len(token) > 100000:
+            continue
+        try:
+            candidates.append(base64.b64decode(token + "=" * (-len(token) % 4),
+                              altchars=b"-_", validate=True).decode("utf-8"))
+        except (ValueError, binascii.Error, UnicodeDecodeError):
+            pass
+    for candidate in candidates:
+        compact = "".join(c for c in candidate.casefold() if c.isalnum())
+        if any("".join(c for c in marker.casefold() if c.isalnum()) in compact
+               for marker in (SYSTEM_PROMPT_CANARY, CONFIDENTIAL_CANARY)):
+            return True
+    return False
+
+
+def guard_retrieved_result(value):
+    """Sanitize instruction-like strings in nested tool results in defended mode.
+
+    Preserve structure and normal facts. Policy labels come from the system
+    prompt; no need to prefix every innocent metadata string.
+    """
+    if active_security_mode() != "defended":
+        return value, GuardDecision(False)
+    detected = False
+
+    def clean(item):
+        nonlocal detected
+        if isinstance(item, dict):
+            return {key: clean(part) for key, part in item.items()}
+        if isinstance(item, list):
+            return [clean(part) for part in item]
+        if isinstance(item, str):
+            sanitized, decision = sanitize_untrusted_document(item)
+            if decision.blocked:
+                detected = True
+                return sanitized
+        return item
+
+    result = clean(value)
+    return result, GuardDecision(detected, "retrieved_content_guard" if detected else None,
+                                 "Embedded tool-result instructions were removed." if detected else None)

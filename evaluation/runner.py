@@ -39,6 +39,8 @@ def run_suite(*, security_mode=None, attack_id=None, all_attacks=False, output_d
     context = get_test_context(security_mode)
     mode = context["security_mode"]
     label = mode if all_attacks else f"{mode}_{selection}"
+    if output_dir is not None and Path(output_dir).resolve() == RESULT_ROOT.resolve() and mode == "baseline":
+        raise ValueError("Baseline evidence is frozen. Use --output-dir results/recheck for a fresh baseline run.")
     records = []
     report = {"security_mode": mode, "selection": selection, "model": context.get("model"),
               "transport": "local Ollama; synthetic document tools only; other calls captured, never transmitted",

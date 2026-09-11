@@ -44,6 +44,15 @@ app.include_router(health_routes.router)
 app.include_router(chat_routes.router)
 app.include_router(security_routes.router)
 
+# The repo-level dashboard is optional in agent-only Docker deployments.
+try:
+    from frontend.server import install_dashboard
+except ModuleNotFoundError as exc:
+    if exc.name not in {"frontend", "frontend.server"}:
+        raise
+else:
+    install_dashboard(app)
+
 
 @app.exception_handler(Exception)
 async def generic_exception_handler(_request, exc: Exception) -> JSONResponse:

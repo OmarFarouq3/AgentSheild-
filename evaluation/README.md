@@ -1,5 +1,11 @@
 # Normal-versus-defended evaluation
 
+> Final demo update: the historical baseline is now frozen. Add
+> `--output-dir results/recheck` to baseline commands below. The final defended
+> prompt includes the same system canary, resolving the Day 2 precondition gap.
+> Run `python -m evaluation.comparison` after defended evaluation; see the root
+> README and FINAL_REPORT.md for the current dashboard and before/after results.
+
 Run from `AgentSheild-`, with the target dependencies installed and the configured
 Qwen model served by local Ollama. No FastAPI, frontend, GitHub, or database service
 is required for this suite.

@@ -72,7 +72,7 @@ async def execute_tool(tool_name: str, arguments: dict[str, Any]) -> Any:
     """Dispatch a model-selected tool call through approved Python callables."""
 
     settings = get_settings()
-    assert_tool_allowed(tool_name)
+    assert_tool_allowed(tool_name, arguments)
 
     if tool_name == UNTRUSTED_DOCUMENT_TOOL_NAME:
         return read_partner_brief()
